@@ -532,10 +532,13 @@ endpointLoop:
 
 func (r *registryRouter) getHandler(services []*registry.Service) string {
 	// check if service handler
-	for _, s := range services {
-		switch h := s.Metadata["handler"]; h {
-		case "http", "proxy", "web":
-			return h
+	for i := range services {
+		endpoints := services[i].Endpoints
+		for j := range endpoints {
+			switch h := endpoints[j].Metadata["handler"]; h {
+			case "http", "proxy", "web":
+				return h
+			}
 		}
 	}
 	// set default handler to api
