@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/2637309949/micro/v3/service/api"
 	"github.com/2637309949/micro/v3/service/api/handler"
 	"github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/resolver/subdomain"
@@ -120,17 +119,9 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// create context
-	ctx := ctx.FromRequest(r)
-	out, err := api.WithXApiField(ctx, request)
-	if err != nil {
-		uhttp.WriteError(w, r, err)
-		return
-	}
-
 	// create request/response
 	var response json.RawMessage
-	req := client.NewRequest(service, endpoint, out, client.WithContentType("application/json"))
+	req := client.NewRequest(service, endpoint, request, client.WithContentType("application/json"))
 
 	var opts []client.CallOption
 
@@ -153,8 +144,11 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// create context
+	ctx := ctx.FromRequest(r)
+
 	// remote call
-	err = h.client.Call(ctx, req, &response, opts...)
+	err := h.client.Call(ctx, req, &response, opts...)
 	if err != nil {
 		uhttp.WriteError(w, r, err)
 		return
