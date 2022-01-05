@@ -379,9 +379,25 @@ type Source struct {
 // Name to be passed to RPC call runtime.Create Update Delete
 // eg: `helloworld/api`, `crufter/myrepo/helloworld/api`, `localfolder`
 func (s *Source) RuntimeName() string {
+	// This is the case for top level url source ie. gitlab.com/micro-test/basic-micro-service
 	if len(s.Folder) == 0 {
-		// This is the case for top level url source ie. gitlab.com/micro-test/basic-micro-service
+		muPath := s.Repo + "/micro.mu"
+		if rsp, err := http.Get(muPath); err == nil {
+			defer rsp.Body.Close()
+			ct, _ := ioutil.ReadAll(rsp.Body)
+			if service := regexp.MustCompile(`service ([\w\.]+)`).FindStringSubmatch(string(ct)); len(service) > 0 {
+				return service[1]
+			}
+		}
 		return path.Base(s.Repo)
+	}
+
+	muPath := path.Join(s.Folder, "micro.mu")
+	if _, err := os.Stat(muPath); err == nil {
+		ct, _ := ioutil.ReadFile(muPath)
+		if service := regexp.MustCompile(`service ([\w\.]+)`).FindStringSubmatch(string(ct)); len(service) > 0 {
+			return service[1]
+		}
 	}
 	return path.Base(s.Folder)
 }
