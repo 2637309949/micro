@@ -72,7 +72,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 		cmd := exec.Command(file)
 		out, err := cmd.CombinedOutput()
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 
 		// write back the header
@@ -83,7 +83,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 			return nil
 		}
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 	}
 

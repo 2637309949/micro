@@ -24,7 +24,7 @@ func (s *Stream) Publish(ctx context.Context, req *pb.PublishRequest, rsp *pb.Pu
 
 	// validate the request
 	if len(req.Topic) == 0 {
-		return errors.BadRequest("events.Stream.Publish", events.ErrMissingTopic.Error())
+		return errors.BadRequest(events.ErrMissingTopic.Error())
 	}
 
 	// parse options
@@ -38,7 +38,7 @@ func (s *Stream) Publish(ctx context.Context, req *pb.PublishRequest, rsp *pb.Pu
 
 	// publish the event
 	if err := events.Publish(req.Topic, req.Payload, opts...); err != nil {
-		return errors.InternalServerError("events.Stream.Publish", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// write the event to the store
@@ -81,7 +81,7 @@ func (s *Stream) Consume(ctx context.Context, req *pb.ConsumeRequest, rsp pb.Str
 	// create the subscriber
 	evChan, err := events.Consume(req.Topic, opts...)
 	if err != nil {
-		return errors.InternalServerError("events.Stream.Consume", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	type eventSent struct {

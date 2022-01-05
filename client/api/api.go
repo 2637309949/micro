@@ -44,7 +44,7 @@ type Response struct {
 	// json and base64 encoded response body
 	Body string `json:"body"`
 	// error fields. Error json example
-	// {"id":"go.micro.client","code":500,"detail":"malformed method name: \"\"","status":"Internal Server Error"}
+	// {"id":"code":500,"detail":"malformed method name: \"\"","status":"Internal Server Error"}
 	Code   int    `json:"code"`
 	ID     string `json:"id"`
 	Detail string `json:"detail"`

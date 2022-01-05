@@ -39,7 +39,7 @@ type greeterServer struct {
 // SayHello implements helloworld.GreeterServer
 func (g *greeterServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
 	if in.Name == "Error" {
-		return nil, &errors.Error{Id: "1", Code: 99, Detail: "detail"}
+		return nil, &errors.Error{Code: 99, Detail: "detail"}
 	}
 	return &pb.HelloReply{Message: "Hello " + in.Name}, nil
 }
@@ -119,7 +119,7 @@ func TestGRPCClient(t *testing.T) {
 		t.Fatalf("invalid error received %#+v\n", err)
 	}
 
-	if verr.Code != 99 && verr.Id != "1" && verr.Detail != "detail" {
+	if verr.Code != 99 && verr.Detail != "detail" {
 		t.Fatalf("invalid error received %#+v\n", verr)
 	}
 

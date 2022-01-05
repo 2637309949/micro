@@ -9,7 +9,7 @@ require (
 	github.com/caddyserver/certmagic v0.10.6
 	github.com/chzyer/logex v1.1.10 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
-	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
+	github.com/chzyer/test v0.0.0-20210722231415-061457976a23 // indirect
 	github.com/cloudflare/cloudflare-go v0.10.9 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/davecgh/go-spew v1.1.1
@@ -43,7 +43,7 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/rs/cors v1.7.0 // indirect
+	github.com/rs/cors v1.8.0 // indirect
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/objx v0.1.1
@@ -60,7 +60,7 @@ require (
 	golang.org/x/net v0.0.0-20201202161906-c7110b5ffcbb
 	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98
 	google.golang.org/grpc v1.40.0
-	google.golang.org/grpc/examples v0.0.0-20211015201449-4757d0249e2d
+	google.golang.org/grpc/examples v0.0.0-20211223220205-344b93a28588
 	google.golang.org/protobuf v1.25.0
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 )

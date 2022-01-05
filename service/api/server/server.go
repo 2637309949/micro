@@ -31,6 +31,7 @@ import (
 	"github.com/2637309949/micro/v3/util/acme"
 	"github.com/2637309949/micro/v3/util/acme/autocert"
 	"github.com/2637309949/micro/v3/util/acme/certmagic"
+	cx "github.com/2637309949/micro/v3/util/ctx"
 	"github.com/2637309949/micro/v3/util/helper"
 	"github.com/2637309949/micro/v3/util/opentelemetry"
 	"github.com/2637309949/micro/v3/util/opentelemetry/jaeger"
@@ -214,6 +215,13 @@ func Run(ctx *cli.Context) error {
 	// create the router
 	var h http.Handler
 	r := mux.NewRouter()
+	// extrace context from header
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r = r.WithContext(cx.FromRequest(r))
+			next.ServeHTTP(w, r)
+		})
+	})
 	h = r
 
 	// return version and list of services

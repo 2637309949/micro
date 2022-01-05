@@ -61,9 +61,9 @@ func (c *Config) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.GetRespons
 
 	ch, err := store.Read(req.Namespace)
 	if err == store.ErrNotFound {
-		return merrors.NotFound("config.Config.Get", "Not found")
+		return merrors.NotFound("Not found")
 	} else if err != nil {
-		return merrors.BadRequest("config.Config.Get", "read error: %v: %v", err, req.Namespace)
+		return merrors.BadRequest("read error: %v: %v", err, req.Namespace)
 	}
 
 	// get secret from options
@@ -84,7 +84,7 @@ func (c *Config) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.GetRespons
 	}
 	dat, err := leavesToValues(string(bs), secret, string(c.secret))
 	if err != nil {
-		return merrors.InternalServerError("config.config.Get", "Error in config structure: %v", err)
+		return merrors.InternalServerError("Error in config structure: %v", err)
 	}
 
 	buf := new(bytes.Buffer)
@@ -92,7 +92,7 @@ func (c *Config) Get(ctx context.Context, req *pb.GetRequest, rsp *pb.GetRespons
 	enc.SetEscapeHTML(false)
 	err = enc.Encode(dat)
 	if err != nil {
-		return merrors.BadRequest("config.Config.Get", "JSOn encode error: %v", err)
+		return merrors.BadRequest("JSOn encode error: %v", err)
 	}
 	rsp.Value.Data = strings.TrimSpace(buf.String())
 
@@ -113,9 +113,9 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 
 	ch, err := store.Read(req.Namespace)
 	if err == store.ErrNotFound {
-		return merrors.NotFound("config.Config.Read", "Not found")
+		return merrors.NotFound("Not found")
 	} else if err != nil {
-		return merrors.BadRequest("config.Config.Read", "read error: %v: %v", err, req.Namespace)
+		return merrors.BadRequest("read error: %v: %v", err, req.Namespace)
 	}
 
 	rsp.Change = &pb.Change{
@@ -135,7 +135,7 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 
 	dat, err := leavesToValues(string(bs), false, string(c.secret))
 	if err != nil {
-		return merrors.InternalServerError("config.config.Read", "Error in config structure: %v", err)
+		return merrors.InternalServerError("Error in config structure: %v", err)
 	}
 
 	buf := new(bytes.Buffer)
@@ -143,7 +143,7 @@ func (c *Config) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadResp
 	enc.SetEscapeHTML(false)
 	err = enc.Encode(dat)
 	if err != nil {
-		return merrors.BadRequest("config.Config.Read", "JSOn encode error: %v", err)
+		return merrors.BadRequest("JSOn encode error: %v", err)
 	}
 	rsp.Change.ChangeSet.Data = strings.TrimSpace(buf.String())
 	rsp.Change.ChangeSet.Format = "json"
@@ -235,7 +235,7 @@ func traverse(i interface{}, decodeSecrets bool, encryptionKey string) (interfac
 
 func (c *Config) Set(ctx context.Context, req *pb.SetRequest, rsp *pb.SetResponse) error {
 	if req.Value == nil {
-		return merrors.BadRequest("config.Config.Update", "invalid change")
+		return merrors.BadRequest("invalid change")
 	}
 	ns := req.Namespace
 	if len(ns) == 0 {
@@ -252,7 +252,7 @@ func (c *Config) Set(ctx context.Context, req *pb.SetRequest, rsp *pb.SetRespons
 	if err == store.ErrNotFound {
 		dat = []byte("{}")
 	} else if err != nil {
-		return merrors.BadRequest("config.Config.Set", "read error: %v: %v", err, ns)
+		return merrors.BadRequest("read error: %v: %v", err, ns)
 	}
 
 	if len(ch) > 0 {
@@ -270,7 +270,7 @@ func (c *Config) Set(ctx context.Context, req *pb.SetRequest, rsp *pb.SetRespons
 	var i interface{}
 	err = json.Unmarshal([]byte(data), &i)
 	if err != nil {
-		return merrors.BadRequest("config.Config.Set", "Request is invalid JSON: %v", err)
+		return merrors.BadRequest("Request is invalid JSON: %v", err)
 	}
 	m, ok := i.(map[string]interface{})
 	// If it's a map, we do a merge
@@ -286,6 +286,10 @@ func (c *Config) Set(ctx context.Context, req *pb.SetRequest, rsp *pb.SetRespons
 		})
 	} else {
 		err = c.setValue(values, secret, req.Path, data)
+	}
+
+	if err != nil {
+		return err
 	}
 
 	return store.Write(&store.Record{
@@ -307,11 +311,11 @@ func (c *Config) setValue(values *config.JSONValues, secret bool, path, data str
 	cleanNode(values, path)
 	if secret {
 		if len(c.secret) == 0 {
-			return merrors.InternalServerError("config.Config.Set", "Can't encode secret: secret key is not set")
+			return merrors.InternalServerError("Can't encode secret: secret key is not set")
 		}
 		encrypted, err := encrypt(data, c.secret)
 		if err != nil {
-			return merrors.InternalServerError("config.Config.Set", "Failed to encrypt: %v", err)
+			return merrors.InternalServerError("Failed to encrypt: %v", err)
 		}
 		data = string(base64.StdEncoding.EncodeToString([]byte(encrypted)))
 		// Need to save metainformation with secret values too
@@ -342,9 +346,9 @@ func (c *Config) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Dele
 
 	ch, err := store.Read(ns)
 	if err == store.ErrNotFound {
-		return merrors.NotFound("config.Config.Delete", "Not found")
+		return merrors.NotFound("Not found")
 	} else if err != nil {
-		return merrors.BadRequest("config.Config.Delete", "read error: %v: %v", err, ns)
+		return merrors.BadRequest("read error: %v: %v", err, ns)
 	}
 
 	values := config.NewJSONValues(ch[0].Value)

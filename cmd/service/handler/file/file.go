@@ -84,7 +84,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 		// lookup the file
 		b, err := ioutil.ReadFile(file)
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 
 		// write back the header
@@ -95,7 +95,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 			return nil
 		}
 		if err != nil {
-			return errors.InternalServerError(req.Service(), err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 	}
 

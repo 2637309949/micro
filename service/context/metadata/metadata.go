@@ -59,6 +59,20 @@ func Copy(md Metadata) Metadata {
 	return cmd
 }
 
+func Merge(md Metadata, patchMd Metadata, overwrite bool) Metadata {
+	cmd := Copy(md)
+	for k, v := range patchMd {
+		if _, ok := cmd[k]; ok && !overwrite {
+			// skip
+		} else if v != "" {
+			cmd[k] = v
+		} else {
+			delete(cmd, k)
+		}
+	}
+	return cmd
+}
+
 // Delete key from metadata
 func Delete(ctx context.Context, k string) context.Context {
 	return Set(ctx, k, "")

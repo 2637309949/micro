@@ -18,19 +18,24 @@
 package web
 
 import (
-	"errors"
+	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/2637309949/micro/v3/service/api"
 	"github.com/2637309949/micro/v3/service/api/handler"
+	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/util/encoding"
+	uhttp "github.com/2637309949/micro/v3/util/http"
 )
 
 const (
@@ -45,18 +50,19 @@ type webHandler struct {
 func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	service, err := wh.getService(r)
 	if err != nil {
-		w.WriteHeader(500)
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
 	if len(service) == 0 {
-		w.WriteHeader(404)
+		er := errors.InternalServerError("not found service")
+		uhttp.WriteError(w, r, er)
 		return
 	}
 
 	rp, err := url.Parse(service)
 	if err != nil {
-		w.WriteHeader(500)
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -64,8 +70,19 @@ func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		wh.serveWebSocket(rp.Host, w, r)
 		return
 	}
-
-	httputil.NewSingleHostReverseProxy(rp).ServeHTTP(w, r)
+	proxy := httputil.NewSingleHostReverseProxy(rp)
+	proxy.ModifyResponse = func(r1 *http.Response) error {
+		if r1.Header.Get("Content-Type") == "application/json" {
+			bodyBytes, _ := ioutil.ReadAll(r1.Body)
+			if len(bodyBytes) > 0 {
+				bodyBytes = encoding.JSONMarshal(r.Context(), bodyBytes)
+				r1.Header.Set("Content-Length", strconv.Itoa(len(bodyBytes)))
+			}
+			r1.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		}
+		return nil
+	}
+	proxy.ServeHTTP(w, r)
 }
 
 // getService returns the service for this request from the selector
@@ -84,7 +101,7 @@ func (wh *webHandler) getService(r *http.Request) (string, error) {
 		service = s
 	} else {
 		// we have no way of routing the request
-		return "", errors.New("no route found")
+		return "", errors.InternalServerError("no route found")
 	}
 
 	// get the nodes
@@ -93,7 +110,7 @@ func (wh *webHandler) getService(r *http.Request) (string, error) {
 		nodes = append(nodes, srv.Nodes...)
 	}
 	if len(nodes) == 0 {
-		return "", errors.New("no route found")
+		return "", errors.InternalServerError("no route found")
 	}
 
 	// select a random node

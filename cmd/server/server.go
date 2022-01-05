@@ -121,8 +121,8 @@ func Run(context *cli.Context) error {
 		// TODO: remove hacks
 		profile := context.String("profile")
 
-		// web has to behave like a client
-		if service == "web" {
+		// web has to behave like a client, fix: api
+		if service == "web" || service == "api" {
 			profile = "client"
 		}
 

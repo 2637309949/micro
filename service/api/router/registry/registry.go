@@ -530,6 +530,21 @@ endpointLoop:
 	return nil, errNotFound
 }
 
+func (r *registryRouter) getHandler(services []*registry.Service) string {
+	// check if service handler
+	for _, s := range services {
+		switch h := s.Metadata["handler"]; h {
+		case "http", "proxy", "web":
+			return h
+		}
+	}
+	// set default handler to api
+	if r.opts.Handler == "meta" {
+		return "rpc"
+	}
+	return r.opts.Handler
+}
+
 func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	if r.isClosed() {
 		return nil, errors.New("router closed")
@@ -566,22 +581,15 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	}
 
 	// only use endpoint matching when the meta handler is set aka api.Default
-	switch r.opts.Handler {
+	switch h := r.getHandler(services); h {
 	// rpc handlers
-	case "meta", "api", "rpc":
-		handler := r.opts.Handler
-
-		// set default handler to api
-		if r.opts.Handler == "meta" {
-			handler = "rpc"
-		}
-
+	case "api", "rpc":
 		// construct api service
 		return &api.Service{
 			Name: name,
 			Endpoint: &api.Endpoint{
 				Name:    rp.Method,
-				Handler: handler,
+				Handler: h,
 			},
 			Services: services,
 		}, nil
@@ -592,7 +600,7 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 			Name: name,
 			Endpoint: &api.Endpoint{
 				Name:    req.URL.String(),
-				Handler: r.opts.Handler,
+				Handler: h,
 				Host:    []string{req.Host},
 				Method:  []string{req.Method},
 				Path:    []string{req.URL.Path},
@@ -612,7 +620,7 @@ func newRouter(opts ...router.Option) *registryRouter {
 		opts:        options,
 		rc:          cache.New(options.Registry),
 		namespaces: map[string]*namespaceEntry{
-			namespace.DefaultNamespace: &namespaceEntry{
+			namespace.DefaultNamespace: {
 				eps:  make(map[string]*api.Service),
 				ceps: make(map[string]*endpoint),
 			}},

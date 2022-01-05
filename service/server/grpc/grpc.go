@@ -231,7 +231,7 @@ func (g *grpcServer) handler(srv interface{}, stream grpc.ServerStream) (err err
 				logger.Error("panic recovered: ", r)
 				logger.Error(string(debug.Stack()))
 			}
-			err = errors.InternalServerError(g.opts.Name, "panic recovered: %v", r)
+			err = errors.InternalServerError("panic recovered: %v", r)
 		} else if err != nil {
 			if logger.V(logger.InfoLevel, logger.DefaultLogger) {
 				logger.Errorf("grpc handler got error: %s", err)
@@ -304,7 +304,7 @@ func (g *grpcServer) handler(srv interface{}, stream grpc.ServerStream) (err err
 	if g.opts.Router != nil {
 		cc, err := g.newGRPCCodec(ct)
 		if err != nil {
-			return errors.InternalServerError(g.opts.Name, err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 		codec := &grpcCodec{
 			ServerStream: stream,
@@ -462,7 +462,7 @@ func (g *grpcServer) processRequest(stream grpc.ServerStream, service *service, 
 
 		cc, err := g.newGRPCCodec(ct)
 		if err != nil {
-			return errors.InternalServerError(g.opts.Name, err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 		b, err := cc.Marshal(argv.Interface())
 		if err != nil {
@@ -504,10 +504,10 @@ func (g *grpcServer) processRequest(stream grpc.ServerStream, service *service, 
 			switch verr := appErr.(type) {
 			case *errors.Error:
 				perr := &pberr.Error{
-					Id:     verr.Id,
-					Code:   verr.Code,
-					Detail: verr.Detail,
-					Status: verr.Status,
+					RequestId: verr.RequestId,
+					Code:      verr.Code,
+					Detail:    verr.Detail,
+					Status:    verr.Status,
 				}
 
 				// micro.Error now proto based and we can attach it to grpc status
@@ -585,10 +585,10 @@ func (g *grpcServer) processStream(stream grpc.ServerStream, service *service, m
 		switch verr := appErr.(type) {
 		case *errors.Error:
 			perr := &pberr.Error{
-				Id:     verr.Id,
-				Code:   verr.Code,
-				Detail: verr.Detail,
-				Status: verr.Status,
+				RequestId: verr.RequestId,
+				Code:      verr.Code,
+				Detail:    verr.Detail,
+				Status:    verr.Status,
 			}
 			// micro.Error now proto based and we can attach it to grpc status
 			statusCode = microError(verr)
@@ -765,9 +765,15 @@ func (g *grpcServer) Register() error {
 		return err
 	}
 
-	// make copy of metadata
-	md := meta.Copy(config.Metadata)
+	// make metadata
+	cmd := make(meta.Metadata, 1)
+	cmd["broker"] = config.Broker.String()
+	cmd["registry"] = config.Registry.String()
+	cmd["server"] = g.String()
+	cmd["transport"] = g.String()
+	cmd["protocol"] = "grpc"
 
+	md := meta.Merge(config.Metadata, cmd, false)
 	// register service
 	node := &registry.Node{
 		Id:       config.Name + "-" + config.Id,
@@ -775,13 +781,8 @@ func (g *grpcServer) Register() error {
 		Metadata: md,
 	}
 
-	node.Metadata["broker"] = config.Broker.String()
-	node.Metadata["registry"] = config.Registry.String()
-	node.Metadata["server"] = g.String()
-	node.Metadata["transport"] = g.String()
-	node.Metadata["protocol"] = "grpc"
-
 	g.RLock()
+
 	// Maps are ordered randomly, sort the keys for consistency
 	var handlerList []string
 	for n, e := range g.handlers {

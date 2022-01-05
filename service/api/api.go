@@ -15,6 +15,7 @@
 package api
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -260,6 +261,56 @@ func slice(s string) []string {
 	return sl
 }
 
+func WithXApiField(ctx context.Context, request interface{}) (interface{}, error) {
+	var out interface{}
+	matches, _, _ := XApiField(ctx)
+	xbuf, err := json.Marshal(matches)
+	if err != nil {
+		return nil, err
+	}
+	xreq, err := json.Marshal(request)
+	if err != nil {
+		return nil, err
+	}
+	rbts, err := jsonpatch.MergeMergePatches(xreq, xbuf)
+	if err != nil {
+		return nil, err
+	}
+	d := json.NewDecoder(strings.NewReader(string(rbts)))
+	d.UseNumber()
+
+	if err := d.Decode(&out); err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
+func XApiField(ctx context.Context) (map[string]interface{}, string, metadata.Metadata) {
+	// dont user metadata.FromContext as it mangles names
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		md = make(map[string]string)
+	}
+
+	// allocate maximum
+	matches := make(map[string]interface{}, len(md))
+	bodydst := ""
+
+	// get fields from url path
+	for k, v := range md {
+		k = strings.ToLower(k)
+		// filter own keys
+		if strings.HasPrefix(k, "x-api-field-") {
+			matches[strings.TrimPrefix(k, "x-api-field-")] = v
+			delete(md, k)
+		} else if k == "x-api-body" {
+			delete(md, k)
+		}
+	}
+	return matches, bodydst, md
+}
+
 // RequestPayload takes a *http.Request and returns the payload
 // If the request is a GET the query string parameters are extracted and marshaled to JSON and the raw bytes are returned.
 // If the request method is a POST the request body is read and returned
@@ -336,15 +387,8 @@ func RequestPayload(r *http.Request) ([]byte, error) {
 
 	// otherwise as per usual
 	ctx := r.Context()
-	// dont user metadata.FromContext as it mangles names
-	md, ok := metadata.FromContext(ctx)
-	if !ok {
-		md = make(map[string]string)
-	}
-
-	// allocate maximum
-	matches := make(map[string]interface{}, len(md))
-	bodydst := ""
+	// extrace x-api-field
+	matches, bodydst, md := XApiField(ctx)
 
 	// get fields from url path
 	for k, v := range md {

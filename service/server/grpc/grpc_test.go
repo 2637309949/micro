@@ -53,7 +53,7 @@ func (s *testServer) HandleError(ctx context.Context, msg *pb.Request) error {
 // TestHello implements helloworld.GreeterServer
 func (s *testServer) CallPcre(ctx context.Context, req *pb.Request, rsp *pb.Response) error {
 	if req.Name == "Error" {
-		return &errors.Error{Id: "1", Code: 99, Detail: "detail"}
+		return &errors.Error{Code: 99, Detail: "detail"}
 	}
 
 	rsp.Msg = "Hello " + req.Name
@@ -63,7 +63,7 @@ func (s *testServer) CallPcre(ctx context.Context, req *pb.Request, rsp *pb.Resp
 // TestHello implements helloworld.GreeterServer
 func (s *testServer) CallPcreInvalid(ctx context.Context, req *pb.Request, rsp *pb.Response) error {
 	if req.Name == "Error" {
-		return &errors.Error{Id: "1", Code: 99, Detail: "detail"}
+		return &errors.Error{Code: 99, Detail: "detail"}
 	}
 
 	rsp.Msg = "Hello " + req.Name
@@ -73,7 +73,7 @@ func (s *testServer) CallPcreInvalid(ctx context.Context, req *pb.Request, rsp *
 // TestHello implements helloworld.GreeterServer
 func (s *testServer) Call(ctx context.Context, req *pb.Request, rsp *pb.Response) error {
 	if req.Name == "Error" {
-		return &errors.Error{Id: "1", Code: 99, Detail: "detail"}
+		return &errors.Error{Code: 99, Detail: "detail"}
 	}
 
 	if req.Name == "Panic" {
@@ -214,7 +214,7 @@ func TestGRPCServer(t *testing.T) {
 		if !ok {
 			t.Fatalf("invalid error received %#+v\n", st.Details()[0])
 		}
-		if verr.Code != 99 && verr.Id != "1" && verr.Detail != "detail" {
+		if verr.Code != 99 && verr.Detail != "detail" {
 			t.Fatalf("invalid error received %#+v\n", verr)
 		}
 	}

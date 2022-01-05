@@ -19,7 +19,10 @@ package auth
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
+
+	"github.com/2637309949/micro/v3/service/context/metadata"
 )
 
 var (
@@ -183,5 +186,11 @@ func AccountFromContext(ctx context.Context) (*Account, bool) {
 
 // ContextWithAccount sets the account in the context
 func ContextWithAccount(ctx context.Context, account *Account) context.Context {
-	return context.WithValue(ctx, accountKey{}, account)
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		md = make(metadata.Metadata)
+	}
+	md[fmt.Sprintf("x-api-field-%s", "operator_id")] = account.ID
+	md[fmt.Sprintf("x-api-field-%s", "operator_name")] = account.Name
+	return metadata.NewContext(context.WithValue(ctx, accountKey{}, account), md)
 }

@@ -37,7 +37,7 @@ func (s *Source) Upload(ctx context.Context, stream pb.Source_UploadStream) erro
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return errors.InternalServerError("runtime.Source.Upload", err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 
 		// get the service from the request, this should be sent on the first message
@@ -53,10 +53,10 @@ func (s *Source) Upload(ctx context.Context, stream pb.Source_UploadStream) erro
 
 	// ensure the blob and a service was sent over the stream
 	if buf == nil {
-		return errors.BadRequest("runtime.Source.Upload", "No blob was sent")
+		return errors.BadRequest("No blob was sent")
 	}
 	if srv == nil {
-		return errors.BadRequest("runtime.Source.Upload", "No service was sent")
+		return errors.BadRequest("No service was sent")
 	}
 
 	// write the source to the store

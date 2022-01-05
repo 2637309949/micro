@@ -63,13 +63,13 @@ type Span struct {
 }
 
 const (
-	traceIDKey = "Micro-Trace-Id"
-	spanIDKey  = "Micro-Span-Id"
+	TraceIDKey = "Micro-Trace-Id"
+	SpanIDKey  = "Micro-Span-Id"
 )
 
 // FromContext returns a span from context
 func FromContext(ctx context.Context) (traceID string, parentSpanID string, isFound bool) {
-	traceID, traceOk := metadata.Get(ctx, traceIDKey)
+	traceID, traceOk := metadata.Get(ctx, TraceIDKey)
 	microID, microOk := metadata.Get(ctx, "Micro-Id")
 	if !traceOk && !microOk {
 		isFound = false
@@ -78,15 +78,15 @@ func FromContext(ctx context.Context) (traceID string, parentSpanID string, isFo
 	if !traceOk {
 		traceID = microID
 	}
-	parentSpanID, ok := metadata.Get(ctx, spanIDKey)
+	parentSpanID, ok := metadata.Get(ctx, SpanIDKey)
 	return traceID, parentSpanID, ok
 }
 
 // ToContext saves the trace and span ids in the context
 func ToContext(ctx context.Context, traceID, parentSpanID string) context.Context {
 	return metadata.MergeContext(ctx, map[string]string{
-		traceIDKey: traceID,
-		spanIDKey:  parentSpanID,
+		TraceIDKey: traceID,
+		SpanIDKey:  parentSpanID,
 	}, true)
 }
 

@@ -13,10 +13,11 @@ const (
 
 // SystemRules are the default rules which are applied to the runtime services
 var SystemRules = []*auth.Rule{
-	&auth.Rule{
+	{
 		ID:       "default",
 		Scope:    auth.ScopePublic,
-		Access:   auth.AccessGranted,
 		Resource: &auth.Resource{Type: "*", Name: "*", Endpoint: "*"},
+		Access:   auth.AccessGranted,
+		Priority: 0,
 	},
 }

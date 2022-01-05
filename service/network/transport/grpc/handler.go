@@ -46,7 +46,7 @@ func (m *microTransport) Stream(ts pb.Transport_StreamServer) (err error) {
 		if r := recover(); r != nil {
 			logger.Error(r, string(debug.Stack()))
 			sock.Close()
-			err = errors.InternalServerError("go.micro.transport", "panic recovered: %v", r)
+			err = errors.InternalServerError("panic recovered: %v", r)
 		}
 	}()
 

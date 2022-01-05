@@ -73,8 +73,6 @@ func Run(c *cli.Context) error {
 			fmt.Println(string(err.(*osexec.ExitError).Stderr))
 		}
 	}
-
-	return nil
 }
 
 func init() {

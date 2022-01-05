@@ -24,7 +24,7 @@ You will need protoc-gen-micro for code generation
 
 - [protobuf](https://github.com/golang/protobuf)
 - [protoc-gen-go](https://github.com/golang/protobuf/tree/master/protoc-gen-go)
-- [protoc-gen-micro](https://github.com/micro/micro/tree/master/cmd/protoc-gen-micro)
+- [protoc-gen-micro](https://github.com/2637309949/micro/tree/master/cmd/protoc-gen-micro)
 
 ```
 # Download latest proto releaes
@@ -49,13 +49,13 @@ Or by downloading the binary
 
 ```sh
 # MacOS
-curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 
 # Linux
-wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 
 # Windows
-powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
 ```
 
 ### Docker Image

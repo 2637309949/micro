@@ -46,9 +46,9 @@ func LookupRoute(ctx context.Context, req Request, opts CallOptions) ([]string, 
 	// lookup the routes which can be used to execute the request
 	routes, err := opts.Router.Lookup(req.Service(), query...)
 	if err == router.ErrRouteNotFound {
-		return nil, errors.InternalServerError("go.micro.client", "service %s: %s", req.Service(), err.Error())
+		return nil, errors.InternalServerError("service %s: %s", req.Service(), err.Error())
 	} else if err != nil {
-		return nil, errors.InternalServerError("go.micro.client", "error getting next %s node: %s", req.Service(), err.Error())
+		return nil, errors.InternalServerError("error getting next %s node: %s", req.Service(), err.Error())
 	}
 
 	// sort by lowest metric first

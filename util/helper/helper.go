@@ -1,16 +1,13 @@
 package helper
 
 import (
-	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"net/http"
 	"strings"
 
-	"github.com/2637309949/micro/v3/service/context/metadata"
 	"github.com/urfave/cli/v2"
 )
 
@@ -22,15 +19,6 @@ func ACMEHosts(ctx *cli.Context) []string {
 		}
 	}
 	return hosts
-}
-
-func RequestToContext(r *http.Request) context.Context {
-	ctx := context.Background()
-	md := make(metadata.Metadata)
-	for k, v := range r.Header {
-		md[k] = strings.Join(v, ",")
-	}
-	return metadata.NewContext(ctx, md)
 }
 
 func TLSConfig(ctx *cli.Context) (*tls.Config, error) {
@@ -87,7 +75,7 @@ func MissingCommand(ctx *cli.Context) error {
 	return cli.Exit(fmt.Sprintf("No command provided to micro. Please refer to 'micro --help'"), 1)
 }
 
-// Subcommand returns the subcommand name
+// MicroSubcommand returns the subcommand name
 func Subcommand(ctx *cli.Context) string {
 	return ctx.Args().First()
 }

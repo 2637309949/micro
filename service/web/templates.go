@@ -573,13 +573,15 @@ pre {padding: 20px;}
 <div class="row">
   <div class="panel">
     <div class="panel-body">
-	<div class="col-sm-2">
+	<div class="col-sm-3">
 	    {{ range $service, $endpoints := .Results }}
+			  <h4>{{Title $service}} Service</h4>
               {{ range $endpoint := $endpoints }}
-                <div><a id="{{$endpoint.Name}}" href="#{{$endpoint.Name}}" onclick="setEndpoint(this)">{{Split $endpoint.Name}}</a></div>
+              	<div><a id="{{$endpoint.Name}}" href="#{{$endpoint.Name}}" onclick="setEndpoint(this)">&nbsp;&nbsp;{{Last $endpoint.Name}}</a></div>
               {{end}}
+			  <hr align="left" width="220" color="#ccc" size="1"/>
 	    {{end}}
-        </div>
+    </div>
 	<div class="col-sm-4">
 		<form id="call-form" onsubmit="return call();">
 			<input class="form-control" type=text name=service id=service style="display: none;">
@@ -594,7 +596,7 @@ pre {padding: 20px;}
 			</div>
 		</form>
 	</div>
-	<div class="col-sm-6">
+	<div class="col-sm-5">
 		<p><b>Response</b><span class="pull-right"><a href="#" onclick="copyResponse()">Copy</a></p>
 		<pre id="response" style="min-height: 405px; max-height: 405px; overflow: scroll;">{}</pre>
 	</div>

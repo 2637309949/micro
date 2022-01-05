@@ -189,7 +189,7 @@ func (n *Network) Routes(ctx context.Context, req *pb.RoutesRequest, resp *pb.Ro
 	}
 
 	if err != nil {
-		return errors.InternalServerError("network.Network.Routes", "failed to list routes: %s", err)
+		return errors.InternalServerError("failed to list routes: %s", err)
 	}
 
 	for _, route := range routes {
@@ -216,7 +216,7 @@ func (n *Network) Services(ctx context.Context, req *pb.ServicesRequest, resp *p
 
 	routes, err := n.Network.Options().Router.Table().Read()
 	if err != nil {
-		return errors.InternalServerError("network.Network.Services", "failed to list services: %s", err)
+		return errors.InternalServerError("failed to list services: %s", err)
 	}
 
 	services := make(map[string]bool)

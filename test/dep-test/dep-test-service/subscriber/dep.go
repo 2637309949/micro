@@ -2,7 +2,6 @@ package subscriber
 
 import (
 	"context"
-
 	log "github.com/2637309949/micro/v3/service/logger"
 
 	dep "dep-test-service/proto/dep"

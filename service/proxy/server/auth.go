@@ -52,11 +52,11 @@ func authHandler() server.HandlerWrapper {
 			// Verify the caller has access to the resource.
 			err := auth.Verify(account, res, auth.VerifyNamespace(ns))
 			if err == auth.ErrForbidden && account != nil {
-				return errors.Forbidden(req.Service(), "Forbidden call made to %v:%v by %v", req.Service(), req.Endpoint(), account.ID)
+				return errors.Forbidden("Forbidden call made to %v:%v by %v", req.Service(), req.Endpoint(), account.ID)
 			} else if err == auth.ErrForbidden {
-				return errors.Unauthorized(req.Service(), "Unauthorized call made to %v:%v", req.Service(), req.Endpoint())
+				return errors.Unauthorized("Unauthorized call made to %v:%v", req.Service(), req.Endpoint())
 			} else if err != nil {
-				return errors.InternalServerError("proxy", "Error authorizing request: %v", err)
+				return errors.InternalServerError("Error authorizing request: %v", err)
 			}
 
 			// The user is authorised, allow the call

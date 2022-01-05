@@ -68,9 +68,9 @@ func (r *Registry) GetService(ctx context.Context, req *pb.GetRequest, rsp *pb.G
 	// get the services in the namespace
 	services, err := registry.DefaultRegistry.GetService(req.Service, registry.GetDomain(options.Domain))
 	if err == registry.ErrNotFound || len(services) == 0 {
-		return errors.NotFound("registry.Registry.GetService", registry.ErrNotFound.Error())
+		return errors.NotFound(registry.ErrNotFound.Error())
 	} else if err != nil {
-		return errors.InternalServerError("registry.Registry.GetService", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// serialize the response
@@ -106,7 +106,7 @@ func (r *Registry) Register(ctx context.Context, req *pb.Service, rsp *pb.EmptyR
 
 	// register the service
 	if err := registry.DefaultRegistry.Register(util.ToService(req), opts...); err != nil {
-		return errors.InternalServerError("registry.Registry.Register", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// publish the event
@@ -132,7 +132,7 @@ func (r *Registry) Deregister(ctx context.Context, req *pb.Service, rsp *pb.Empt
 
 	// deregister the service
 	if err := registry.DefaultRegistry.Deregister(util.ToService(req), registry.DeregisterDomain(domain)); err != nil {
-		return errors.InternalServerError("registry.Registry.Deregister", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// publish the event
@@ -160,7 +160,7 @@ func (r *Registry) ListServices(ctx context.Context, req *pb.ListRequest, rsp *p
 	// list the services from the registry
 	services, err := registry.DefaultRegistry.ListServices(registry.ListDomain(domain))
 	if err != nil {
-		return errors.InternalServerError("registry.Registry.ListServices", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// serialize the response
@@ -191,13 +191,13 @@ func (r *Registry) Watch(ctx context.Context, req *pb.WatchRequest, rsp pb.Regis
 	// setup the watcher
 	watcher, err := registry.DefaultRegistry.Watch(registry.WatchService(req.Service), registry.WatchDomain(domain))
 	if err != nil {
-		return errors.InternalServerError("registry.Registry.Watch", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	for {
 		next, err := watcher.Next()
 		if err != nil {
-			return errors.InternalServerError("registry.Registry.Watch", err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 
 		err = rsp.Send(&pb.Result{
@@ -205,7 +205,7 @@ func (r *Registry) Watch(ctx context.Context, req *pb.WatchRequest, rsp pb.Regis
 			Service: util.ToProto(next.Service),
 		})
 		if err != nil {
-			return errors.InternalServerError("registry.Registry.Watch", err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 	}
 }

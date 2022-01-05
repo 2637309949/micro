@@ -31,7 +31,7 @@ Find the current implementation in [github.com/micro/go-micro/v2/errors](https:/
 When output the error appears in json format
 
 ```
-{"id": "go.micro.client", "code": 500, "detail": "an error occurred calling the service", "status": "internal server error"}
+{"code": 500, "detail": "an error occurred calling the service", "status": "internal server error"}
 ```
 
 These errors are passed via the `Micro-Error` header or in grpc encapsulated within their error type.

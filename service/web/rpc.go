@@ -2,19 +2,21 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/api"
 	"github.com/2637309949/micro/v3/service/api/handler"
 	"github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/resolver/subdomain"
 	cors "github.com/2637309949/micro/v3/service/api/server/http"
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/errors"
-	"github.com/2637309949/micro/v3/util/helper"
+	"github.com/2637309949/micro/v3/util/ctx"
+	"github.com/2637309949/micro/v3/util/encoding"
+	uhttp "github.com/2637309949/micro/v3/util/http"
 )
 
 type rpcRequest struct {
@@ -47,12 +49,6 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	badRequest := func(description string) {
-		e := errors.BadRequest("go.micro.rpc", description)
-		w.WriteHeader(400)
-		w.Write([]byte(e.Error()))
-	}
-
 	var service, endpoint, address string
 	var request interface{}
 
@@ -74,7 +70,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		d.UseNumber()
 
 		if err := d.Decode(&rpcReq); err != nil {
-			badRequest(err.Error())
+			uhttp.WriteError(w, r, err)
 			return
 		}
 
@@ -92,7 +88,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			d.UseNumber()
 
 			if err := d.Decode(&request); err != nil {
-				badRequest("error decoding request string: " + err.Error())
+				uhttp.WriteError(w, r, err)
 				return
 			}
 		}
@@ -109,28 +105,32 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		d.UseNumber()
 
 		if err := d.Decode(&request); err != nil {
-			badRequest("error decoding request string: " + err.Error())
+			uhttp.WriteError(w, r, err)
 			return
 		}
 	}
 
 	if len(service) == 0 {
-		badRequest("invalid service")
+		uhttp.WriteError(w, r, errors.InternalServerError("invalid service"))
 		return
 	}
 
 	if len(endpoint) == 0 {
-		badRequest("invalid endpoint")
+		uhttp.WriteError(w, r, errors.InternalServerError("invalid endpoint"))
+		return
+	}
+
+	// create context
+	ctx := ctx.FromRequest(r)
+	out, err := api.WithXApiField(ctx, request)
+	if err != nil {
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
 	// create request/response
 	var response json.RawMessage
-	var err error
-	req := client.NewRequest(service, endpoint, request, client.WithContentType("application/json"))
-
-	// create context
-	ctx := helper.RequestToContext(r)
+	req := client.NewRequest(service, endpoint, out, client.WithContentType("application/json"))
 
 	var opts []client.CallOption
 
@@ -155,27 +155,19 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// remote call
 	err = h.client.Call(ctx, req, &response, opts...)
-	fmt.Println("request", req.Service(), err)
 	if err != nil {
-		ce := errors.Parse(err.Error())
-		switch ce.Code {
-		case 0:
-			// assuming it's totally screwed
-			ce.Code = 500
-			ce.Id = "go.micro.rpc"
-			ce.Status = http.StatusText(500)
-			ce.Detail = "error during request: " + ce.Detail
-			w.WriteHeader(500)
-		default:
-			w.WriteHeader(int(ce.Code))
-		}
-		w.Write([]byte(ce.Error()))
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
-	b, _ := response.MarshalJSON()
-	w.Header().Set("Content-Length", strconv.Itoa(len(b)))
-	w.Write(b)
+	rsp, err := response.MarshalJSON()
+	if err != nil {
+		uhttp.WriteError(w, r, err)
+		return
+	}
+	rsp = encoding.JSONMarshal(ctx, rsp)
+	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
+	w.Write(rsp)
 }
 
 // NewRPCHandler returns an initialized RPC handler

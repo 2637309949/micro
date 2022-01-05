@@ -25,7 +25,8 @@ import (
 	"github.com/2637309949/micro/v3/service/api/handler"
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/errors"
-	"github.com/2637309949/micro/v3/util/ctx"
+	"github.com/2637309949/micro/v3/util/encoding"
+	uhttp "github.com/2637309949/micro/v3/util/http"
 	"github.com/2637309949/micro/v3/util/router"
 )
 
@@ -48,10 +49,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, bsize)
 	request, err := requestToProto(r)
 	if err != nil {
-		er := errors.InternalServerError("go.micro.api", err.Error())
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(500)
-		w.Write([]byte(er.Error()))
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -64,19 +62,17 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// try get service from router
 		s, err := a.opts.Router.Route(r)
 		if err != nil {
-			er := errors.InternalServerError("go.micro.api", err.Error())
+			er := errors.InternalServerError(err.Error())
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(500)
+			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(er.Error()))
 			return
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
-		er := errors.InternalServerError("go.micro.api", "no route found")
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(500)
-		w.Write([]byte(er.Error()))
+		er := errors.InternalServerError("no route found")
+		uhttp.WriteError(w, r, er)
 		return
 	}
 
@@ -85,19 +81,8 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	req := c.NewRequest(service.Name, service.Endpoint.Name, request)
 	rsp := &api.Response{}
 
-	// create the context from headers
-	cx := ctx.FromRequest(r)
-
-	if err := c.Call(cx, req, rsp, client.WithRouter(router.New(service.Services))); err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		ce := errors.Parse(err.Error())
-		switch ce.Code {
-		case 0:
-			w.WriteHeader(500)
-		default:
-			w.WriteHeader(int(ce.Code))
-		}
-		w.Write([]byte(ce.Error()))
+	if err := c.Call(r.Context(), req, rsp, client.WithRouter(router.New(service.Services))); err != nil {
+		uhttp.WriteError(w, r, err)
 		return
 	} else if rsp.StatusCode == 0 {
 		rsp.StatusCode = http.StatusOK
@@ -114,7 +99,8 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(int(rsp.StatusCode))
-	w.Write([]byte(rsp.Body))
+	body := encoding.JSONMarshal(r.Context(), []byte(rsp.Body))
+	w.Write(body)
 }
 
 func (a *apiHandler) String() string {

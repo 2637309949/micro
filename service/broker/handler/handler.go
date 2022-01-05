@@ -18,12 +18,12 @@ func (h *Broker) Publish(ctx context.Context, req *pb.PublishRequest, rsp *pb.Em
 	// authorize the request
 	acc, ok := auth.AccountFromContext(ctx)
 	if !ok {
-		return errors.Unauthorized("broker.Broker.Publish", authns.ErrForbidden.Error())
+		return errors.Unauthorized(authns.ErrForbidden.Error())
 	}
 
 	// validate the request
 	if req.Message == nil {
-		return errors.BadRequest("broker.Broker.Publish", "Missing message")
+		return errors.BadRequest("Missing message")
 	}
 
 	// ensure the header is not nil
@@ -47,7 +47,7 @@ func (h *Broker) Publish(ctx context.Context, req *pb.PublishRequest, rsp *pb.Em
 	})
 	logger.Debugf("Published message to %s topic in the %v namespace", req.Topic, acc.Issuer)
 	if err != nil {
-		return errors.InternalServerError("broker.Broker.Publish", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 	return nil
 }
@@ -56,12 +56,12 @@ func (h *Broker) Subscribe(ctx context.Context, req *pb.SubscribeRequest, stream
 	// authorize the request
 	acc, ok := auth.AccountFromContext(ctx)
 	if !ok {
-		return errors.Unauthorized("broker.Broker.Subscribe", authns.ErrForbidden.Error())
+		return errors.Unauthorized(authns.ErrForbidden.Error())
 	}
 	ns := acc.Issuer
 
 	if len(req.Topic) == 0 {
-		return errors.BadRequest("broker.Broker.Subscribe", "Missing topic")
+		return errors.BadRequest("Missing topic")
 	}
 	errChan := make(chan error, 1)
 

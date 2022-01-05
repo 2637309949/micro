@@ -604,9 +604,15 @@ func (s *rpcServer) Register() error {
 		return err
 	}
 
-	// make copy of metadata
-	md := metadata.Copy(config.Metadata)
+	// make metadata
+	cmd := make(metadata.Metadata, 1)
+	cmd["transport"] = config.Transport.String()
+	cmd["broker"] = config.Broker.String()
+	cmd["server"] = s.String()
+	cmd["registry"] = config.Registry.String()
+	cmd["protocol"] = "mucp"
 
+	md := metadata.Merge(config.Metadata, cmd, false)
 	// mq-rpc(eg. nats) doesn't need the port. its addr is queue name.
 	if port != "" {
 		addr = mnet.HostPort(addr, port)
@@ -618,12 +624,6 @@ func (s *rpcServer) Register() error {
 		Address:  addr,
 		Metadata: md,
 	}
-
-	node.Metadata["transport"] = config.Transport.String()
-	node.Metadata["broker"] = config.Broker.String()
-	node.Metadata["server"] = s.String()
-	node.Metadata["registry"] = config.Registry.String()
-	node.Metadata["protocol"] = "mucp"
 
 	s.RLock()
 

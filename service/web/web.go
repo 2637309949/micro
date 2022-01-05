@@ -29,6 +29,7 @@ import (
 	"github.com/2637309949/micro/v3/util/acme"
 	"github.com/2637309949/micro/v3/util/acme/autocert"
 	"github.com/2637309949/micro/v3/util/acme/certmagic"
+	cx "github.com/2637309949/micro/v3/util/ctx"
 	"github.com/2637309949/micro/v3/util/helper"
 	"github.com/2637309949/micro/v3/util/sync/memory"
 	"github.com/fatih/camelcase"
@@ -109,6 +110,11 @@ func (s *srv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func split(v string) string {
 	parts := camelcase.Split(strings.Replace(v, ".", "", 1))
 	return strings.Join(parts, " ")
+}
+
+func last(v string) string {
+	parts := strings.Split(v, ".")
+	return split(parts[len(parts)-1])
 }
 
 func format(v *registry.Value) string {
@@ -243,10 +249,10 @@ func (s *srv) logoutHandler(w http.ResponseWriter, req *http.Request) {
 		Value:   "",
 		Expires: time.Unix(0, 0),
 		Domain:  domain,
-		Secure:  true,
+		Secure:  false,
 	})
 
-	http.Redirect(w, req, "/", 302)
+	http.Redirect(w, req, "/", http.StatusFound)
 }
 
 func (s *srv) generateTokenHandler(w http.ResponseWriter, req *http.Request) {
@@ -281,6 +287,7 @@ func (s *srv) generateTokenHandler(w http.ResponseWriter, req *http.Request) {
 		auth.WithTokenIssuer(Namespace),
 		auth.WithExpiry(time.Hour*24*7),
 	)
+
 	if err != nil {
 		renderError("Authentication failed: " + err.Error())
 		return
@@ -290,13 +297,12 @@ func (s *srv) generateTokenHandler(w http.ResponseWriter, req *http.Request) {
 	if arr := strings.Split(req.Host, ":"); len(arr) > 0 {
 		domain = arr[0]
 	}
-
 	http.SetCookie(w, &http.Cookie{
 		Name:    TokenCookieName,
 		Value:   acc.AccessToken,
 		Expires: acc.Expiry,
 		Domain:  domain,
-		Secure:  true,
+		Secure:  false,
 	})
 
 	http.Redirect(w, req, "/", http.StatusFound)
@@ -434,9 +440,12 @@ func (s *srv) serviceHandler(w http.ResponseWriter, r *http.Request) {
 	serviceMap := make(map[string][]*registry.Endpoint)
 
 	for _, service := range services {
-		if len(service.Endpoints) > 0 {
-			serviceMap[service.Name] = service.Endpoints
-			continue
+		for _, endpoint := range service.Endpoints {
+			service := strings.Split(endpoint.Name, ".")[0]
+			if _, ok := serviceMap[service]; !ok {
+				serviceMap[service] = []*registry.Endpoint{}
+			}
+			serviceMap[service] = append(serviceMap[service], endpoint)
 		}
 	}
 
@@ -467,6 +476,7 @@ type templateValue struct {
 func (s *srv) render(w http.ResponseWriter, r *http.Request, tmpl string, data interface{}, vals ...templateValue) {
 	t, err := template.New("template").Funcs(template.FuncMap{
 		"Split":  split,
+		"Last":   last,
 		"format": format,
 		"Title":  strings.Title,
 		"First": func(s string) string {
@@ -567,10 +577,15 @@ func Run(ctx *cli.Context) error {
 		},
 		resolver: resolver,
 	}
+	// extrace context from header
+	srv.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r = r.WithContext(cx.FromRequest(r))
+			next.ServeHTTP(w, r)
+		})
+	})
 
-	var h http.Handler
-	// set as the server
-	h = srv
+	var h http.Handler = srv
 
 	// the web handler itself
 	srv.HandleFunc("/favicon.ico", faviconHandler)

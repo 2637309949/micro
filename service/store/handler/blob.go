@@ -32,11 +32,11 @@ func (b *BlobStore) Read(ctx context.Context, req *pb.BlobReadRequest, stream pb
 	// execute the request
 	blob, err := store.DefaultBlobStore.Read(req.Key, store.BlobNamespace(req.Options.Namespace))
 	if err == store.ErrNotFound {
-		return errors.NotFound("store.Blob.Read", "Blob not found")
+		return errors.NotFound("Blob not found")
 	} else if err == store.ErrMissingKey {
-		return errors.BadRequest("store.Blob.Read", "Missing key")
+		return errors.BadRequest("Missing key")
 	} else if err != nil {
-		return errors.InternalServerError("store.Blob.Read", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// read from the blob and stream it to the client
@@ -69,7 +69,7 @@ func (b *BlobStore) Write(ctx context.Context, stream pb.BlobStore_WriteStream) 
 		if err == io.EOF {
 			break
 		} else if err != nil {
-			return errors.InternalServerError("store.Blob.Write", err.Error())
+			return errors.InternalServerError(err.Error())
 		}
 
 		if buf == nil {
@@ -96,15 +96,15 @@ func (b *BlobStore) Write(ctx context.Context, stream pb.BlobStore_WriteStream) 
 
 	// ensure the blob was sent over the stream
 	if buf == nil {
-		return errors.BadRequest("store.Blob.Write", "No blob was sent")
+		return errors.BadRequest("No blob was sent")
 	}
 
 	// execute the request
 	err := store.DefaultBlobStore.Write(key, buf, store.BlobNamespace(options.Namespace), store.BlobPublic(options.Public), store.BlobContentType(options.ContentType))
 	if err == store.ErrMissingKey {
-		return errors.BadRequest("store.Blob.Write", "Missing key")
+		return errors.BadRequest("Missing key")
 	} else if err != nil {
-		return errors.InternalServerError("store.Blob.Write", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	// close the stream
@@ -127,11 +127,11 @@ func (b *BlobStore) Delete(ctx context.Context, req *pb.BlobDeleteRequest, rsp *
 	// execute the request
 	err := store.DefaultBlobStore.Delete(req.Key, store.BlobNamespace(req.Options.Namespace))
 	if err == store.ErrNotFound {
-		return errors.NotFound("store.Blob.Delete", "Blob not found")
+		return errors.NotFound("Blob not found")
 	} else if err == store.ErrMissingKey {
-		return errors.BadRequest("store.Blob.Delete", "Missing key")
+		return errors.BadRequest("Missing key")
 	} else if err != nil {
-		return errors.InternalServerError("store.Blob.Delete", err.Error())
+		return errors.InternalServerError(err.Error())
 	}
 
 	return nil
