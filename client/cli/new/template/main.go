@@ -13,11 +13,11 @@ import (
 )
 
 func main() {
-	// Create handler
-	hdl := handler.Handler{}
-
 	// Create service
 	srv := service.New(service.Name("{{lower .Alias}}"))
+
+	// Create handler
+	hdl := handler.Handler{}
 
 	// Register handler
 	{{dehyphen .Alias}}.Register{{title .Alias}}Handler(srv.Server(), &hdl)
