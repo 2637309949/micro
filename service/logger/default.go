@@ -24,7 +24,7 @@ import (
 	"sync"
 	"time"
 
-	dlog "github.com/micro/micro/v3/service/debug/log"
+	dlog "github.com/2637309949/micro/v3/service/debug/log"
 )
 
 func init() {

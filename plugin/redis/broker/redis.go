@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/broker"
+	"github.com/2637309949/micro/v3/service/events"
+	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/broker"
-	"github.com/micro/micro/v3/service/events"
-	"github.com/micro/micro/v3/service/logger"
 	"github.com/pkg/errors"
 )
 

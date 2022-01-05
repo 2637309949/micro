@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/micro/micro/v3/service/auth"
-	merrors "github.com/micro/micro/v3/service/errors"
+	"github.com/2637309949/micro/v3/service/auth"
+	merrors "github.com/2637309949/micro/v3/service/errors"
 )
 
 var (

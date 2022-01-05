@@ -10,16 +10,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro/micro/v3/service/auth"
-	"github.com/micro/micro/v3/service/build"
-	"github.com/micro/micro/v3/service/build/util/tar"
-	"github.com/micro/micro/v3/service/client"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/runtime"
-	kclient "github.com/micro/micro/v3/service/runtime/kubernetes/client"
-	"github.com/micro/micro/v3/service/runtime/source/git"
-	"github.com/micro/micro/v3/service/store"
-	"github.com/micro/micro/v3/util/namespace"
+	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/build"
+	"github.com/2637309949/micro/v3/service/build/util/tar"
+	"github.com/2637309949/micro/v3/service/client"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/runtime"
+	kclient "github.com/2637309949/micro/v3/service/runtime/kubernetes/client"
+	"github.com/2637309949/micro/v3/service/runtime/source/git"
+	"github.com/2637309949/micro/v3/service/store"
+	"github.com/2637309949/micro/v3/util/namespace"
 )
 
 const (

@@ -21,11 +21,11 @@ import (
 	"crypto/tls"
 	"net"
 
+	"github.com/2637309949/micro/v3/service/broker/memory"
+	memReg "github.com/2637309949/micro/v3/service/registry/memory"
+	"github.com/2637309949/micro/v3/service/server"
+	"github.com/2637309949/micro/v3/util/codec"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
-	"github.com/micro/micro/v3/service/broker/memory"
-	memReg "github.com/micro/micro/v3/service/registry/memory"
-	"github.com/micro/micro/v3/service/server"
-	"github.com/micro/micro/v3/util/codec"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding"
 )

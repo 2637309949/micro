@@ -19,8 +19,8 @@ import (
 	"io"
 	"io/ioutil"
 
+	"github.com/2637309949/micro/v3/util/codec"
 	"github.com/golang/protobuf/proto"
-	"github.com/micro/micro/v3/util/codec"
 )
 
 type Codec struct {

@@ -19,7 +19,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/micro/micro/v3/service/config"
+	"github.com/2637309949/micro/v3/service/config"
 )
 
 // NewSecrets returns a config that encrypts values at rest

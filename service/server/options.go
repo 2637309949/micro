@@ -22,15 +22,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/micro/v3/service/auth"
-	"github.com/micro/micro/v3/service/broker"
-	"github.com/micro/micro/v3/service/broker/memory"
-	"github.com/micro/micro/v3/service/debug/trace"
-	"github.com/micro/micro/v3/service/network/transport"
-	thttp "github.com/micro/micro/v3/service/network/transport/http"
-	"github.com/micro/micro/v3/service/registry"
-	memReg "github.com/micro/micro/v3/service/registry/memory"
-	"github.com/micro/micro/v3/util/codec"
+	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/broker"
+	"github.com/2637309949/micro/v3/service/broker/memory"
+	"github.com/2637309949/micro/v3/service/debug/trace"
+	"github.com/2637309949/micro/v3/service/network/transport"
+	thttp "github.com/2637309949/micro/v3/service/network/transport/http"
+	"github.com/2637309949/micro/v3/service/registry"
+	memReg "github.com/2637309949/micro/v3/service/registry/memory"
+	"github.com/2637309949/micro/v3/util/codec"
 )
 
 type Options struct {

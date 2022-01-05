@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/micro/micro/v3/service/broker"
+	"github.com/2637309949/micro/v3/service/broker"
 	nats "github.com/nats-io/nats.go"
 )
 

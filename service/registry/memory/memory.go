@@ -20,9 +20,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/registry"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/registry"
 )
 
 var (

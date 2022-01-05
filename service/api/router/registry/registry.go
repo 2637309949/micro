@@ -26,14 +26,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/micro/micro/v3/service/api"
-	"github.com/micro/micro/v3/service/api/router"
-	"github.com/micro/micro/v3/service/context/metadata"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/registry"
-	"github.com/micro/micro/v3/service/registry/cache"
-	"github.com/micro/micro/v3/util/namespace"
-	util "github.com/micro/micro/v3/util/router"
+	"github.com/2637309949/micro/v3/service/api"
+	"github.com/2637309949/micro/v3/service/api/router"
+	"github.com/2637309949/micro/v3/service/context/metadata"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/registry/cache"
+	"github.com/2637309949/micro/v3/util/namespace"
+	util "github.com/2637309949/micro/v3/util/router"
 )
 
 var (

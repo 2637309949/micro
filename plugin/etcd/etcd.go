@@ -29,12 +29,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/registry"
+	hash "github.com/mitchellh/hashstructure"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
 	"go.etcd.io/etcd/mvcc/mvccpb"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/registry"
-	hash "github.com/mitchellh/hashstructure"
 	"go.uber.org/zap"
 )
 

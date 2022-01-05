@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package api;
 
-option go_package = "github.com/micro/micro/v3/proto/api;api";
+option go_package = "github.com/2637309949/micro/v3/proto/api;api";
 
 service Api {
   rpc AddToBlockList(AddToBlockListRequest) returns (AddToBlockListResponse) {};

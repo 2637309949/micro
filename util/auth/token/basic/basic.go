@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/store"
+	"github.com/2637309949/micro/v3/util/auth/token"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/auth"
-	"github.com/micro/micro/v3/service/store"
-	"github.com/micro/micro/v3/util/auth/token"
 )
 
 // Basic implementation of token provider, backed by the store

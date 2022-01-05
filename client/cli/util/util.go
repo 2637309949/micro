@@ -8,9 +8,9 @@ import (
 	"regexp"
 	"strings"
 
-	merrors "github.com/micro/micro/v3/service/errors"
+	merrors "github.com/2637309949/micro/v3/service/errors"
 
-	"github.com/micro/micro/v3/util/config"
+	"github.com/2637309949/micro/v3/util/config"
 	"github.com/urfave/cli/v2"
 )
 

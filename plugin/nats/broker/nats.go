@@ -23,8 +23,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/micro/micro/v3/service/broker"
-	"github.com/micro/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/broker"
+	"github.com/2637309949/micro/v3/service/logger"
 	nats "github.com/nats-io/nats.go"
 )
 
@@ -294,8 +294,8 @@ func (n *natsBroker) onDisconnectedError(conn *nats.Conn, err error) {
 func NewBroker(opts ...broker.Option) broker.Broker {
 	options := broker.Options{
 		// Default codec
-		Codec:    Marshaler{},
-		Context:  context.Background(),
+		Codec:   Marshaler{},
+		Context: context.Background(),
 	}
 
 	n := &natsBroker{

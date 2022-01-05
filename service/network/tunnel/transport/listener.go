@@ -15,8 +15,8 @@
 package transport
 
 import (
-	"github.com/micro/micro/v3/service/network/transport"
-	"github.com/micro/micro/v3/service/network/tunnel"
+	"github.com/2637309949/micro/v3/service/network/transport"
+	"github.com/2637309949/micro/v3/service/network/tunnel"
 )
 
 type tunListener struct {

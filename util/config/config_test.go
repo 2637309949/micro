@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/micro/micro/v3/util/user"
+	"github.com/2637309949/micro/v3/util/user"
 	"github.com/nightlyone/lockfile"
 )
 

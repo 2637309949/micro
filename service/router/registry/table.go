@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Original source: github.com/micro/micro/v3/router/registry/table.go
+// Original source: github.com/2637309949/micro/v3/router/registry/table.go
 
 package registry
 
@@ -18,9 +18,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/router"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/router"
 )
 
 // table is an in-memory routing table

@@ -28,9 +28,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/micro/micro/v3/service/api"
-	"github.com/micro/micro/v3/service/api/handler"
-	"github.com/micro/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/api"
+	"github.com/2637309949/micro/v3/service/api/handler"
+	"github.com/2637309949/micro/v3/service/registry"
 )
 
 const (

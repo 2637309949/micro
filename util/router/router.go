@@ -17,8 +17,8 @@
 package router
 
 import (
-	"github.com/micro/micro/v3/service/registry"
-	"github.com/micro/micro/v3/service/router"
+	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/router"
 )
 
 type apiRouter struct {

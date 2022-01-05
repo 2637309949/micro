@@ -5,10 +5,10 @@ import (
 	"context"
 	"sync"
 
-	debug "github.com/micro/micro/v3/service/debug/handler"
-	"github.com/micro/micro/v3/service/proxy"
-	"github.com/micro/micro/v3/service/server"
-	"github.com/micro/micro/v3/service/server/mucp"
+	debug "github.com/2637309949/micro/v3/service/debug/handler"
+	"github.com/2637309949/micro/v3/service/proxy"
+	"github.com/2637309949/micro/v3/service/server"
+	"github.com/2637309949/micro/v3/service/server/mucp"
 )
 
 // Server is a proxy muxer that incudes the use of the DefaultHandler

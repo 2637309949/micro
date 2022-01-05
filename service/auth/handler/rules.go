@@ -6,12 +6,12 @@ import (
 	"strings"
 	"sync"
 
-	pb "github.com/micro/micro/v3/proto/auth"
-	"github.com/micro/micro/v3/service/auth"
-	"github.com/micro/micro/v3/service/errors"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/store"
-	"github.com/micro/micro/v3/util/auth/namespace"
+	pb "github.com/2637309949/micro/v3/proto/auth"
+	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/errors"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/store"
+	"github.com/2637309949/micro/v3/util/auth/namespace"
 )
 
 const (

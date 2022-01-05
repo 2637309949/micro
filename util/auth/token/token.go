@@ -20,7 +20,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/micro/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/auth"
 )
 
 var (

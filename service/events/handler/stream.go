@@ -5,13 +5,13 @@ import (
 	"sync"
 	"time"
 
+	pb "github.com/2637309949/micro/v3/proto/events"
+	"github.com/2637309949/micro/v3/service/errors"
+	"github.com/2637309949/micro/v3/service/events"
+	"github.com/2637309949/micro/v3/service/events/util"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/util/auth/namespace"
 	"github.com/google/uuid"
-	pb "github.com/micro/micro/v3/proto/events"
-	"github.com/micro/micro/v3/service/errors"
-	"github.com/micro/micro/v3/service/events"
-	"github.com/micro/micro/v3/service/events/util"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/util/auth/namespace"
 )
 
 type Stream struct{}

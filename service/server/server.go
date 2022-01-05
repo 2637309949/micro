@@ -20,9 +20,9 @@ import (
 	"context"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/util/codec"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/registry"
-	"github.com/micro/micro/v3/util/codec"
 )
 
 // DefaultServer for the service

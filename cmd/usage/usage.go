@@ -11,9 +11,9 @@ import (
 	"os"
 	"time"
 
+	pb "github.com/2637309949/micro/v3/cmd/usage/proto"
 	"github.com/golang/protobuf/proto"
 	"github.com/google/uuid"
-	pb "github.com/micro/micro/v3/cmd/usage/proto"
 )
 
 var (

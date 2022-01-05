@@ -3,9 +3,9 @@ package converter
 import (
 	"fmt"
 
+	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/golang/protobuf/protoc-gen-go/descriptor"
-	"github.com/micro/micro/v3/service/logger"
 )
 
 // Converts a proto "SERVICE" into an OpenAPI path:

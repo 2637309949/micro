@@ -10,7 +10,7 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 
-	"github.com/micro/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/logger"
 )
 
 type CallbackFunc func() error
@@ -37,7 +37,7 @@ func NewWatcher(root string, delay time.Duration, fn CallbackFunc) (*watcher, er
 		fileWatcher:  fileWatcher,
 		eventsChan:   make(chan string, 1000),
 		callbackFunc: fn,
-		stopChan: make(chan struct{}),
+		stopChan:     make(chan struct{}),
 	}, nil
 }
 

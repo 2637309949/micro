@@ -17,8 +17,8 @@ package store
 import (
 	"testing"
 
+	"github.com/2637309949/micro/v3/service/events"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/events"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -22,7 +22,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/micro/micro/v3/service/api/resolver"
+	"github.com/2637309949/micro/v3/service/api/resolver"
 )
 
 type Resolver struct {

@@ -2,7 +2,7 @@
 package runtime
 
 import (
-	"github.com/micro/micro/v3/cmd"
+	"github.com/2637309949/micro/v3/cmd"
 	"github.com/urfave/cli/v2"
 )
 
@@ -52,7 +52,7 @@ var flags = []cli.Flag{
 		only watching *.go and *.proto files now`,
 	},
 	&cli.IntFlag{
-		Name:  "watch_delay",
+		Name: "watch_delay",
 		Usage: `Watching delay milliseconds for live-reloading, only valid when --watch=true. 
 		e.g. watch_delay=500 means watching delay time is 500ms.`,
 		Value: 1000,

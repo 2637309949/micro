@@ -23,16 +23,16 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/broker"
+	"github.com/2637309949/micro/v3/service/client"
+	"github.com/2637309949/micro/v3/service/context/metadata"
+	"github.com/2637309949/micro/v3/service/errors"
+	"github.com/2637309949/micro/v3/service/network/transport"
+	"github.com/2637309949/micro/v3/util/buf"
+	"github.com/2637309949/micro/v3/util/codec"
+	raw "github.com/2637309949/micro/v3/util/codec/bytes"
+	"github.com/2637309949/micro/v3/util/pool"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/broker"
-	"github.com/micro/micro/v3/service/client"
-	"github.com/micro/micro/v3/service/context/metadata"
-	"github.com/micro/micro/v3/service/errors"
-	"github.com/micro/micro/v3/service/network/transport"
-	"github.com/micro/micro/v3/util/buf"
-	"github.com/micro/micro/v3/util/codec"
-	raw "github.com/micro/micro/v3/util/codec/bytes"
-	"github.com/micro/micro/v3/util/pool"
 )
 
 type rpcClient struct {

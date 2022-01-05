@@ -10,7 +10,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Original source: github.com/micro/micro/v3/service/network/mucp/mucp.go
+// Original source: github.com/2637309949/micro/v3/service/network/mucp/mucp.go
 
 package mucp
 
@@ -24,23 +24,23 @@ import (
 	"sync"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/client"
+	cmucp "github.com/2637309949/micro/v3/service/client/mucp"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/network"
+	pb "github.com/2637309949/micro/v3/service/network/mucp/proto"
+	"github.com/2637309949/micro/v3/service/network/resolver/dns"
+	"github.com/2637309949/micro/v3/service/network/transport"
+	"github.com/2637309949/micro/v3/service/network/tunnel"
+	bun "github.com/2637309949/micro/v3/service/network/tunnel/broker"
+	tun "github.com/2637309949/micro/v3/service/network/tunnel/transport"
+	"github.com/2637309949/micro/v3/service/proxy"
+	"github.com/2637309949/micro/v3/service/registry/noop"
+	"github.com/2637309949/micro/v3/service/router"
+	"github.com/2637309949/micro/v3/service/server"
+	smucp "github.com/2637309949/micro/v3/service/server/mucp"
+	"github.com/2637309949/micro/v3/util/backoff"
 	"github.com/golang/protobuf/proto"
-	"github.com/micro/micro/v3/service/client"
-	cmucp "github.com/micro/micro/v3/service/client/mucp"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/network"
-	pb "github.com/micro/micro/v3/service/network/mucp/proto"
-	"github.com/micro/micro/v3/service/network/resolver/dns"
-	"github.com/micro/micro/v3/service/network/transport"
-	"github.com/micro/micro/v3/service/network/tunnel"
-	bun "github.com/micro/micro/v3/service/network/tunnel/broker"
-	tun "github.com/micro/micro/v3/service/network/tunnel/transport"
-	"github.com/micro/micro/v3/service/proxy"
-	"github.com/micro/micro/v3/service/registry/noop"
-	"github.com/micro/micro/v3/service/router"
-	"github.com/micro/micro/v3/service/server"
-	smucp "github.com/micro/micro/v3/service/server/mucp"
-	"github.com/micro/micro/v3/util/backoff"
 )
 
 var (

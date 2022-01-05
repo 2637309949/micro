@@ -18,11 +18,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro/micro/v3/client/cli/namespace"
-	"github.com/micro/micro/v3/client/cli/util"
-	"github.com/micro/micro/v3/service/auth"
-	"github.com/micro/micro/v3/util/config"
-	"github.com/micro/micro/v3/util/user"
+	"github.com/2637309949/micro/v3/client/cli/namespace"
+	"github.com/2637309949/micro/v3/client/cli/util"
+	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/util/config"
+	"github.com/2637309949/micro/v3/util/user"
 	"github.com/urfave/cli/v2"
 )
 

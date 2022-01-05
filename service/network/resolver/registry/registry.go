@@ -16,9 +16,9 @@
 package registry
 
 import (
-	"github.com/micro/micro/v3/service/network/resolver"
-	"github.com/micro/micro/v3/service/registry"
-	"github.com/micro/micro/v3/service/registry/memory"
+	"github.com/2637309949/micro/v3/service/network/resolver"
+	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/registry/memory"
 )
 
 // Resolver is a registry network resolver

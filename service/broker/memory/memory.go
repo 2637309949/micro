@@ -24,10 +24,10 @@ import (
 	"sync"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/broker"
+	maddr "github.com/2637309949/micro/v3/util/addr"
+	mnet "github.com/2637309949/micro/v3/util/net"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/broker"
-	maddr "github.com/micro/micro/v3/util/addr"
-	mnet "github.com/micro/micro/v3/util/net"
 )
 
 type memoryBroker struct {

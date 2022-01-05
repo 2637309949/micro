@@ -5,11 +5,11 @@ import (
 	"context"
 	"time"
 
-	pb "github.com/micro/micro/v3/proto/debug"
-	"github.com/micro/micro/v3/service/debug"
-	"github.com/micro/micro/v3/service/debug/log"
-	"github.com/micro/micro/v3/service/debug/stats"
-	"github.com/micro/micro/v3/service/debug/trace"
+	pb "github.com/2637309949/micro/v3/proto/debug"
+	"github.com/2637309949/micro/v3/service/debug"
+	"github.com/2637309949/micro/v3/service/debug/log"
+	"github.com/2637309949/micro/v3/service/debug/stats"
+	"github.com/2637309949/micro/v3/service/debug/trace"
 )
 
 // NewHandler returns an instance of the Debug Handler

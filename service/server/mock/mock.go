@@ -20,8 +20,8 @@ import (
 	"errors"
 	"sync"
 
+	"github.com/2637309949/micro/v3/service/server"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/server"
 )
 
 type MockServer struct {

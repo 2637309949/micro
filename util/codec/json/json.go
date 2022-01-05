@@ -19,9 +19,9 @@ import (
 	"encoding/json"
 	"io"
 
+	"github.com/2637309949/micro/v3/util/codec"
 	"github.com/golang/protobuf/jsonpb"
 	"github.com/golang/protobuf/proto"
-	"github.com/micro/micro/v3/util/codec"
 )
 
 type Codec struct {

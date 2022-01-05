@@ -7,20 +7,20 @@ import (
 	osexec "os/exec"
 	"strings"
 
+	"github.com/2637309949/micro/v3/client/cli/util"
+	"github.com/2637309949/micro/v3/cmd"
 	"github.com/chzyer/readline"
-	"github.com/micro/micro/v3/client/cli/util"
-	"github.com/micro/micro/v3/cmd"
 	"github.com/urfave/cli/v2"
 
-	_ "github.com/micro/micro/v3/client/cli/auth"
-	_ "github.com/micro/micro/v3/client/cli/config"
-	_ "github.com/micro/micro/v3/client/cli/gen"
-	_ "github.com/micro/micro/v3/client/cli/init"
-	_ "github.com/micro/micro/v3/client/cli/network"
-	_ "github.com/micro/micro/v3/client/cli/new"
-	_ "github.com/micro/micro/v3/client/cli/run"
-	_ "github.com/micro/micro/v3/client/cli/store"
-	_ "github.com/micro/micro/v3/client/cli/user"
+	_ "github.com/2637309949/micro/v3/client/cli/auth"
+	_ "github.com/2637309949/micro/v3/client/cli/config"
+	_ "github.com/2637309949/micro/v3/client/cli/gen"
+	_ "github.com/2637309949/micro/v3/client/cli/init"
+	_ "github.com/2637309949/micro/v3/client/cli/network"
+	_ "github.com/2637309949/micro/v3/client/cli/new"
+	_ "github.com/2637309949/micro/v3/client/cli/run"
+	_ "github.com/2637309949/micro/v3/client/cli/store"
+	_ "github.com/2637309949/micro/v3/client/cli/user"
 )
 
 var (

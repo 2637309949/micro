@@ -17,11 +17,11 @@
 package mucp
 
 import (
-	"github.com/micro/micro/v3/service/broker/memory"
-	thttp "github.com/micro/micro/v3/service/network/transport/http"
-	memReg "github.com/micro/micro/v3/service/registry/memory"
-	"github.com/micro/micro/v3/service/server"
-	"github.com/micro/micro/v3/util/codec"
+	"github.com/2637309949/micro/v3/service/broker/memory"
+	thttp "github.com/2637309949/micro/v3/service/network/transport/http"
+	memReg "github.com/2637309949/micro/v3/service/registry/memory"
+	"github.com/2637309949/micro/v3/service/server"
+	"github.com/2637309949/micro/v3/util/codec"
 )
 
 func newOptions(opt ...server.Option) server.Options {

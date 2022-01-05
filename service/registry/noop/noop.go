@@ -18,7 +18,7 @@ package noop
 import (
 	"errors"
 
-	"github.com/micro/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/registry"
 )
 
 type noopRegistry struct{}

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/micro/micro/v3/service/build"
+	"github.com/2637309949/micro/v3/service/build"
 	"github.com/stretchr/testify/assert"
 )
 

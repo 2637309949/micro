@@ -1,10 +1,10 @@
 package util
 
 import (
-	pb "github.com/micro/micro/v3/proto/network"
-	rtrPb "github.com/micro/micro/v3/proto/router"
-	"github.com/micro/micro/v3/service/network"
-	"github.com/micro/micro/v3/service/router"
+	pb "github.com/2637309949/micro/v3/proto/network"
+	rtrPb "github.com/2637309949/micro/v3/proto/router"
+	"github.com/2637309949/micro/v3/service/network"
+	"github.com/2637309949/micro/v3/service/router"
 )
 
 // PeersToProto returns node peers graph encoded into protobuf

@@ -29,9 +29,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/runtime"
-	"github.com/micro/micro/v3/service/runtime/kubernetes/api"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/runtime"
+	"github.com/2637309949/micro/v3/service/runtime/kubernetes/api"
 )
 
 var (

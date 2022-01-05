@@ -17,9 +17,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/micro/micro/v3/service/config"
-	"github.com/micro/micro/v3/service/config/secrets"
-	"github.com/micro/micro/v3/service/store/memory"
+	"github.com/2637309949/micro/v3/service/config"
+	"github.com/2637309949/micro/v3/service/config/secrets"
+	"github.com/2637309949/micro/v3/service/store/memory"
 )
 
 type conf1 struct {

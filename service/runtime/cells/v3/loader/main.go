@@ -7,11 +7,11 @@ import (
 	"os/signal"
 	"syscall"
 
-	runtime "github.com/micro/micro/v3/proto/runtime"
-	"github.com/micro/micro/v3/service"
-	"github.com/micro/micro/v3/service/client"
-	"github.com/micro/micro/v3/service/context"
-	"github.com/micro/micro/v3/service/logger"
+	runtime "github.com/2637309949/micro/v3/proto/runtime"
+	"github.com/2637309949/micro/v3/service"
+	"github.com/2637309949/micro/v3/service/client"
+	"github.com/2637309949/micro/v3/service/context"
+	"github.com/2637309949/micro/v3/service/logger"
 )
 
 func main() {

@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/2637309949/micro/v3/cmd/protoc-gen-openapi/converter"
+	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/golang/protobuf/proto"
 	plugin "github.com/golang/protobuf/protoc-gen-go/plugin"
-	"github.com/micro/micro/v3/cmd/protoc-gen-openapi/converter"
-	"github.com/micro/micro/v3/service/logger"
 )
 
 func main() {

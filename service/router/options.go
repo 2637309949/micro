@@ -10,16 +10,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-// Original source: github.com/micro/micro/v3/router/options.go
+// Original source: github.com/2637309949/micro/v3/router/options.go
 
 package router
 
 import (
 	"context"
 
+	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/registry/memory"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/registry"
-	"github.com/micro/micro/v3/service/registry/memory"
 )
 
 // Options are router options

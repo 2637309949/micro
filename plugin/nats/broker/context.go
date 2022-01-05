@@ -19,7 +19,7 @@ package nats
 import (
 	"context"
 
-	"github.com/micro/micro/v3/service/broker"
+	"github.com/2637309949/micro/v3/service/broker"
 )
 
 // setBrokerOption returns a function to setup a context with given value

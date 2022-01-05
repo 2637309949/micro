@@ -19,7 +19,7 @@ import (
 	gosync "sync"
 	"time"
 
-	"github.com/micro/micro/v3/util/sync"
+	"github.com/2637309949/micro/v3/util/sync"
 )
 
 type memorySync struct {

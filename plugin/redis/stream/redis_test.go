@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/micro/micro/v3/service/events"
+	"github.com/2637309949/micro/v3/service/events"
 	"github.com/stretchr/testify/assert"
 )
 

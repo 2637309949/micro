@@ -24,12 +24,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/2637309949/micro/v3/service/store"
+	"github.com/2637309949/micro/v3/service/store/cache"
+	"github.com/2637309949/micro/v3/service/store/file"
+	"github.com/2637309949/micro/v3/service/store/memory"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/kr/pretty"
-	"github.com/micro/micro/v3/service/store"
-	"github.com/micro/micro/v3/service/store/cache"
-	"github.com/micro/micro/v3/service/store/file"
-	"github.com/micro/micro/v3/service/store/memory"
 )
 
 func fileStoreCleanup(db string, s store.Store) {

@@ -12,9 +12,9 @@ import (
 	"sync"
 	"time"
 
+	pb "github.com/2637309949/micro/v3/cmd/usage/proto"
 	"github.com/golang/protobuf/proto"
 	"github.com/gorilla/handlers"
-	pb "github.com/micro/micro/v3/cmd/usage/proto"
 	bolt "go.etcd.io/bbolt"
 )
 

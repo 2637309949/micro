@@ -15,7 +15,7 @@
 package noop
 
 import (
-	"github.com/micro/micro/v3/service/debug/log"
+	"github.com/2637309949/micro/v3/service/debug/log"
 )
 
 type noop struct{}

@@ -7,17 +7,17 @@ import (
 	"strings"
 	"time"
 
-	"github.com/micro/micro/v3/service/auth"
-	"github.com/micro/micro/v3/service/client"
-	"github.com/micro/micro/v3/service/context/metadata"
-	"github.com/micro/micro/v3/service/debug"
-	"github.com/micro/micro/v3/service/debug/trace"
-	"github.com/micro/micro/v3/service/errors"
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/metrics"
-	"github.com/micro/micro/v3/service/server"
-	inauth "github.com/micro/micro/v3/util/auth"
-	"github.com/micro/micro/v3/util/cache"
+	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/client"
+	"github.com/2637309949/micro/v3/service/context/metadata"
+	"github.com/2637309949/micro/v3/service/debug"
+	"github.com/2637309949/micro/v3/service/debug/trace"
+	"github.com/2637309949/micro/v3/service/errors"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/metrics"
+	"github.com/2637309949/micro/v3/service/server"
+	inauth "github.com/2637309949/micro/v3/util/auth"
+	"github.com/2637309949/micro/v3/util/cache"
 )
 
 type authWrapper struct {

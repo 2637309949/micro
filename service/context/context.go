@@ -4,8 +4,8 @@ package context
 import (
 	"context"
 
-	"github.com/micro/micro/v3/service/context/metadata"
-	"github.com/micro/micro/v3/util/namespace"
+	"github.com/2637309949/micro/v3/service/context/metadata"
+	"github.com/2637309949/micro/v3/util/namespace"
 )
 
 var (

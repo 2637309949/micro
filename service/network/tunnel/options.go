@@ -17,9 +17,9 @@ package tunnel
 import (
 	"time"
 
+	"github.com/2637309949/micro/v3/service/network/transport"
+	"github.com/2637309949/micro/v3/service/network/transport/grpc"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/network/transport"
-	"github.com/micro/micro/v3/service/network/transport/grpc"
 )
 
 var (

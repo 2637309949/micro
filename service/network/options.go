@@ -15,13 +15,13 @@
 package network
 
 import (
+	"github.com/2637309949/micro/v3/service/network/tunnel"
+	tmucp "github.com/2637309949/micro/v3/service/network/tunnel/mucp"
+	"github.com/2637309949/micro/v3/service/proxy"
+	"github.com/2637309949/micro/v3/service/proxy/mucp"
+	"github.com/2637309949/micro/v3/service/router"
+	regRouter "github.com/2637309949/micro/v3/service/router/registry"
 	"github.com/google/uuid"
-	"github.com/micro/micro/v3/service/network/tunnel"
-	tmucp "github.com/micro/micro/v3/service/network/tunnel/mucp"
-	"github.com/micro/micro/v3/service/proxy"
-	"github.com/micro/micro/v3/service/proxy/mucp"
-	"github.com/micro/micro/v3/service/router"
-	regRouter "github.com/micro/micro/v3/service/router/registry"
 )
 
 type Option func(*Options)

@@ -18,7 +18,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/micro/micro/v3/service/network/transport"
+	"github.com/2637309949/micro/v3/service/network/transport"
 )
 
 func call(b *testing.B, c int) {

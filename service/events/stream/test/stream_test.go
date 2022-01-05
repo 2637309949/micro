@@ -1,3 +1,4 @@
+//go:build nats
 // +build nats
 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,8 +22,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/micro/micro/v3/service/events"
-	"github.com/micro/micro/v3/service/events/stream/memory"
+	"github.com/2637309949/micro/v3/service/events"
+	"github.com/2637309949/micro/v3/service/events/stream/memory"
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"

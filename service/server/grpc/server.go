@@ -30,8 +30,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/server"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/server"
 )
 
 var (
