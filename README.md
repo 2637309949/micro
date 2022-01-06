@@ -8,6 +8,7 @@ Micro is a distributed cloud operating system.
 - Support web service, proxy from api gateway 
 - Support std restful response 
 - Support rpc with account
+- Support rotate logs
 - Optimize dashboard
 
 ## Authentication advice
