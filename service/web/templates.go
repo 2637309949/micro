@@ -27,23 +27,23 @@ var (
 					height: 25px;
 				}
 
-				input[type=submit] {
-					
+				input[type=submit]:active {
+					background-color: darkgray;
 				}
 			</style>
 		</head>
 		<body>
 			<div class="error">{{ .error }}</div>
 			<div class='inner'>
-				<h1>Login</h1>
+				<h1 style="text-align: center;">Login</h1>
 				<form method='post'>
 					<label for='username'>Username</label>
-					<input type='username' name='username' required />
+					<input type='username' name='username' required style="border: 1px solid #ccc;border-radius: 3px;" />
 
 					<label for='password'>Password</label>
-					<input type='password' name='password' required />
+					<input type='password' name='password' required style="border: 1px solid #ccc;border-radius: 3px;" />
 
-					<input type='submit' value='Submit' />
+					<input type='submit' value='Submit' style="border: 1px solid #ccc;font-size: 14px;border-radius: 4px;border-color: #d9d9d9;" />
 				</form>
 			</div>
 		</body>
@@ -321,7 +321,7 @@ jQuery(function($, undefined) {
 	</div>
 	<div class="col-sm-7">
 		<p><b>Response</b><span class="pull-right"><a href="#" onclick="copyResponse()">Copy</a></p>
-		<pre id="response" style="min-height: 405px; max-height: 405px; overflow: scroll;">{}</pre>
+		<pre id="response" style="min-height: 405px; max-height: 405px; overflow: scroll; background: rgb(31, 41, 55); color: rgb(248, 248, 242);">{}</pre>
 	</div>
     </div>
   </div>
@@ -598,7 +598,7 @@ pre {padding: 20px;}
 	</div>
 	<div class="col-sm-5">
 		<p><b>Response</b><span class="pull-right"><a href="#" onclick="copyResponse()">Copy</a></p>
-		<pre id="response" style="min-height: 405px; max-height: 405px; overflow: scroll;">{}</pre>
+		<pre id="response" style="min-height: 405px; max-height: 405px; overflow: scroll; background: rgb(31, 41, 55); color: rgb(248, 248, 242);">{}</pre>
 	</div>
     </div>
   </div>

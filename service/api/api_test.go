@@ -23,7 +23,7 @@ import (
 
 	go_api "github.com/2637309949/micro/v3/proto/api"
 	"github.com/2637309949/micro/v3/service/api"
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 )
 
 func TestEncoding(t *testing.T) {

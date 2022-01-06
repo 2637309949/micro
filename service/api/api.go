@@ -319,7 +319,7 @@ func RequestPayload(r *http.Request) ([]byte, error) {
 		for k, v := range r.MultipartForm.Value {
 			vals[k] = strings.Join(v, ",")
 		}
-		for k, _ := range r.MultipartForm.File {
+		for k := range r.MultipartForm.File {
 			f, _, err := r.FormFile(k)
 			if err != nil {
 				return nil, err
