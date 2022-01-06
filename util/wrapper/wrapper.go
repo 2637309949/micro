@@ -83,16 +83,16 @@ func AuthHandler() server.HandlerWrapper {
 				case strings.HasPrefix(header, "Basic "):
 					b, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(header, "Basic "))
 					if err != nil {
-						return errors.Unauthorized(req.Service(), "invalid authorization header. Incorrect format")
+						return errors.Unauthorized("invalid authorization header. Incorrect format")
 					}
 					parts := strings.SplitN(string(b), ":", 2)
 					if len(parts) != 2 {
-						return errors.Unauthorized(req.Service(), "invalid authorization header. Incorrect format")
+						return errors.Unauthorized("invalid authorization header. Incorrect format")
 					}
 
 					token = parts[1]
 				default:
-					return errors.Unauthorized(req.Service(), "invalid authorization header. Expected Bearer or Basic schema")
+					return errors.Unauthorized("invalid authorization header. Expected Bearer or Basic schema")
 				}
 			}
 
