@@ -342,6 +342,7 @@ func (c *command) Before(ctx *cli.Context) error {
 		}
 	}
 
+	logger.Infof("Loading profile %s", prof)
 	// apply the profile
 	if profile, err := profile.Load(prof); err != nil {
 		logger.Fatal(err)
