@@ -112,8 +112,8 @@ var (
               <div class="collapse navbar-collapse" id="navBar">
 	        <ul class="nav navbar-nav navbar-right" id="dev">
 		  {{if gt (len .User) 0 }}
-                    <span class="user small" style="position: absolute; top: -40px; right: 20px;">
-                      Logged in as: {{.User}}
+                    <span class="user small" style="position: absolute; top: -40px; right: 20px;font-weight: bold;">
+                      {{.User}}
                     </span>
                   {{end}}
 	          <li><a href="/">Home</a></li>
@@ -190,15 +190,15 @@ var (
   margin: 0 auto;
 }
 .icon {
-  width: 60px;
-  height: 60px;
+  width: 50px;
+  height: 50px;
   display: block;
   border-radius: 50px; 
-  border: 2px solid whitesmoke;
+  border: 1px solid #C0C0C0;
   background-color: #fcfcfc;
   color: #AFACBE;
-  font-size: 40px;
-  font-weight: bold;
+  font-size: 33px;
+  font-weight: 500;
 }
 .icon:hover {
   color: #23527c;
