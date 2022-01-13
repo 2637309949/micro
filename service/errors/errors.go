@@ -59,11 +59,10 @@ func FromError(err error) *Error {
 // fails, it will set the given string as the error detail.
 func Parse(err string, id ...string) *Error {
 	e := new(Error)
-	errr := json.Unmarshal([]byte(err), e)
-	if errr != nil {
+	if e1 := json.Unmarshal([]byte(err), e); e1 != nil {
 		e.Detail = err
 	}
-	if len(id) > 0 && e.RequestId == "" {
+	if len(id) > 0 && len(e.RequestId) == 0 {
 		e.RequestId = id[0]
 	}
 	return e

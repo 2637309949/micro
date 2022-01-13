@@ -29,7 +29,6 @@ import (
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/util/codec/bytes"
-	"github.com/2637309949/micro/v3/util/encoding"
 	uhttp "github.com/2637309949/micro/v3/util/http"
 	"github.com/2637309949/micro/v3/util/router"
 )
@@ -178,7 +177,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			uhttp.WriteError(w, r, err)
 			return
 		}
-		rsp = encoding.JSONMarshal(r.Context(), rsp)
+		rsp = uhttp.Marshal(r.Context(), rsp)
 	}
 
 	// write the response

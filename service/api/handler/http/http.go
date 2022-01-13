@@ -31,7 +31,6 @@ import (
 	"github.com/2637309949/micro/v3/service/api/handler"
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/service/registry"
-	"github.com/2637309949/micro/v3/util/encoding"
 	uhttp "github.com/2637309949/micro/v3/util/http"
 )
 
@@ -70,7 +69,7 @@ func (h *httpHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if r1.Header.Get("Content-Type") == "application/json" {
 			bodyBytes, _ := ioutil.ReadAll(r1.Body)
 			if len(bodyBytes) > 0 {
-				bodyBytes = encoding.JSONMarshal(r.Context(), bodyBytes)
+				bodyBytes = uhttp.Marshal(r.Context(), bodyBytes)
 				r1.Header.Set("Content-Length", strconv.Itoa(len(bodyBytes)))
 			}
 			r1.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))

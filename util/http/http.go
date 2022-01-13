@@ -17,10 +17,6 @@ func WriteError(w http.ResponseWriter, r *http.Request, err error) {
 
 	// parse out the error code
 	ce := errors.Parse(err.Error(), traceID)
-	if cd2 := errors.Parse(ce.Detail, traceID); cd2.Code != 0 {
-		ce = cd2
-	}
-
 	switch ce.Code {
 	case 0:
 		ce.Code = 500

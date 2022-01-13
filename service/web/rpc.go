@@ -14,7 +14,6 @@ import (
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/util/ctx"
-	"github.com/2637309949/micro/v3/util/encoding"
 	uhttp "github.com/2637309949/micro/v3/util/http"
 )
 
@@ -159,7 +158,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		uhttp.WriteError(w, r, err)
 		return
 	}
-	rsp = encoding.JSONMarshal(ctx, rsp)
+	rsp = uhttp.Marshal(ctx, rsp)
 	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
 	w.Write(rsp)
 }

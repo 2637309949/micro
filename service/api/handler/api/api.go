@@ -25,7 +25,6 @@ import (
 	"github.com/2637309949/micro/v3/service/api/handler"
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/errors"
-	"github.com/2637309949/micro/v3/util/encoding"
 	uhttp "github.com/2637309949/micro/v3/util/http"
 	"github.com/2637309949/micro/v3/util/router"
 )
@@ -96,7 +95,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(int(rsp.StatusCode))
-	body := encoding.JSONMarshal(r.Context(), []byte(rsp.Body))
+	body := uhttp.Marshal(r.Context(), []byte(rsp.Body))
 	w.Write(body)
 }
 

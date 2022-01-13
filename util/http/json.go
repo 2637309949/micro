@@ -1,4 +1,4 @@
-package encoding
+package http
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 )
 
 // see https://stackoverflow.com/questions/28595664/how-to-stop-json-marshal-from-escaping-and/28596225
-func JSONMarshal(ctx context.Context, t []byte) []byte {
+func Marshal(ctx context.Context, t []byte) []byte {
 	traceID, _, _ := trace.FromContext(ctx)
 	rsp := bytes.TrimRight(t, "\n")
 	if strings.HasPrefix(string(rsp), "{") {
