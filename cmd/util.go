@@ -102,7 +102,7 @@ func setupAuthForService() error {
 			return err
 		}
 		if logger.V(logger.DebugLevel, logger.DefaultLogger) {
-			logger.Debugf("Auth [%v] Generated an auth account", auth.DefaultAuth.String())
+			logger.Debugf("generated an auth account")
 		}
 
 		accID = acc.ID
@@ -151,7 +151,7 @@ func refreshAuthToken() {
 				auth.WithExpiry(time.Minute*10),
 			)
 			if err == auth.ErrInvalidToken {
-				logger.Warnf("[Auth] Refresh token expired, regenerating using account credentials")
+				logger.Warnf("refresh token expired, regenerating using account credentials")
 
 				tok, err = auth.Token(
 					auth.WithCredentials(
@@ -161,12 +161,12 @@ func refreshAuthToken() {
 					auth.WithExpiry(time.Minute*10),
 				)
 			} else if err != nil {
-				logger.Warnf("[Auth] Error refreshing token: %v", err)
+				logger.Warnf("refreshing token: %v", err)
 				continue
 			}
 
 			// set the token
-			logger.Debugf("Auth token refreshed, expires at %v", tok.Expiry.Format(time.UnixDate))
+			logger.Debugf("token refreshed, expires at %v", tok.Expiry.Format(time.UnixDate))
 			auth.DefaultAuth.Init(auth.ClientToken(tok))
 		}
 	}
