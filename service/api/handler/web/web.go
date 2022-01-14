@@ -71,7 +71,7 @@ func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	proxy := httputil.NewSingleHostReverseProxy(rp)
 	proxy.ModifyResponse = func(r1 *http.Response) error {
-		if r1.Header.Get("Content-Type") == "application/json" {
+		if strings.HasPrefix(r1.Header.Get("Content-Type"), "application/json") {
 			bodyBytes, _ := ioutil.ReadAll(r1.Body)
 			if len(bodyBytes) > 0 {
 				bodyBytes = uhttp.Marshal(r.Context(), bodyBytes)
