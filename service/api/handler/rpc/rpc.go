@@ -201,6 +201,10 @@ func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte) {
 	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
 	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
 
+	if len(w.Header().Get("Content-Type")) == 0 {
+		w.Header().Set("Content-Type", "application/json")
+	}
+
 	// Set trailers
 	if strings.Contains(r.Header.Get("Content-Type"), "application/grpc") {
 		w.Header().Set("Trailer", "grpc-status")
