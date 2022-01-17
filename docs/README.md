@@ -1,6 +1,3 @@
-<img src="https://raw.githubusercontent.com/micro/micro/master/docs/images/xaas.jpeg" style="height: auto; width: 100%;">
-
-## Programming the Real World
 
 Micro is a distributed cloud operating system.
 
@@ -33,7 +30,7 @@ Documentation, guides and quick starts for Micro
 
 ## Cloud
 
-A living, breathing version of Micro runs as a cloud platform called [M3O](https://m3o.com).
+A living version of Micro runs as a cloud platform called M3O - [github.com/m3o/m3o](https://github.com/m3o/m3o).
 
 ## Services
 
