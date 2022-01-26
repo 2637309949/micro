@@ -14,8 +14,6 @@ import (
 	memBroker "github.com/2637309949/micro/v3/service/broker/memory"
 	"github.com/2637309949/micro/v3/service/build/golang"
 	"github.com/2637309949/micro/v3/service/client"
-	"github.com/2637309949/micro/v3/service/config"
-	storeConfig "github.com/2637309949/micro/v3/service/config/store"
 	evStore "github.com/2637309949/micro/v3/service/events/store"
 	memStream "github.com/2637309949/micro/v3/service/events/stream/memory"
 	"github.com/2637309949/micro/v3/service/logger"
@@ -95,7 +93,6 @@ var Local = &Profile{
 		microAuth.DefaultAuth = jwt.NewAuth()
 		microStore.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
 		SetupConfigSecretKey(ctx)
-		config.DefaultConfig, _ = storeConfig.NewConfig(microStore.DefaultStore, "")
 		SetupJWT(ctx)
 
 		// the registry service uses the memory registry, the other core services will use the default
@@ -163,14 +160,13 @@ var Local = &Profile{
 	},
 }
 
-// staging profile to run locally
+// staging profile to run staging
 var Staging = &Profile{
 	Name: "staging",
 	Setup: func(ctx *cli.Context) error {
 		microAuth.DefaultAuth = jwt.NewAuth()
 		microStore.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
 		SetupConfigSecretKey(ctx)
-		config.DefaultConfig, _ = storeConfig.NewConfig(microStore.DefaultStore, "")
 		SetupJWT(ctx)
 
 		// the registry service uses the memory registry, the other core services will use the default
@@ -278,10 +274,6 @@ var Kubernetes = &Profile{
 			SetupBroker(memBroker.NewBroker())
 		}
 
-		config.DefaultConfig, err = storeConfig.NewConfig(microStore.DefaultStore, "")
-		if err != nil {
-			logger.Fatalf("Error configuring config: %v", err)
-		}
 		SetupConfigSecretKey(ctx)
 
 		// Use k8s routing which is DNS based
@@ -319,7 +311,6 @@ var Test = &Profile{
 		microAuth.DefaultAuth = noop.NewAuth()
 		microStore.DefaultStore = mem.NewStore()
 		microStore.DefaultBlobStore, _ = file.NewBlobStore()
-		config.DefaultConfig, _ = storeConfig.NewConfig(microStore.DefaultStore, "")
 		SetupRegistry(memory.NewRegistry())
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
