@@ -20,5 +20,6 @@ func Marshal(ctx context.Context, t []byte) []byte {
 			rsp = []byte(strings.Replace(string(rsp), "{", "{\"request_id\": \""+traceID+"\",", 1))
 		}
 	}
+	rsp = []byte(strings.ReplaceAll(string(rsp), ",}", "}"))
 	return rsp
 }
