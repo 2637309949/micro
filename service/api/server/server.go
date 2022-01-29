@@ -215,7 +215,6 @@ func Run(ctx *cli.Context) error {
 	// create the router
 	var h http.Handler
 	r := mux.NewRouter()
-	// extrace context from header
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			r = r.WithContext(cx.FromRequest(r))

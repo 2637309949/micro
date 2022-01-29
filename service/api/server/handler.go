@@ -8,13 +8,13 @@ import (
 	"github.com/2637309949/micro/v3/service/api/handler/event"
 	"github.com/2637309949/micro/v3/service/api/router"
 	"github.com/2637309949/micro/v3/service/client"
-	"github.com/2637309949/micro/v3/service/errors"
 
 	// TODO: only import handler package
 	aapi "github.com/2637309949/micro/v3/service/api/handler/api"
 	ahttp "github.com/2637309949/micro/v3/service/api/handler/http"
 	arpc "github.com/2637309949/micro/v3/service/api/handler/rpc"
 	aweb "github.com/2637309949/micro/v3/service/api/handler/web"
+	uhttp "github.com/2637309949/micro/v3/util/http"
 )
 
 type metaHandler struct {
@@ -26,10 +26,7 @@ type metaHandler struct {
 func (m *metaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	service, err := m.r.Route(r)
 	if err != nil {
-		er := errors.InternalServerError(m.ns, err.Error())
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(500)
-		w.Write([]byte(er.Error()))
+		uhttp.WriteError(w, r, err)
 		return
 	}
 

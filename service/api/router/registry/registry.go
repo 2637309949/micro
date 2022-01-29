@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/2637309949/micro/v3/service/api"
+	"github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/router"
 	"github.com/2637309949/micro/v3/service/context/metadata"
 	"github.com/2637309949/micro/v3/service/logger"
@@ -530,7 +531,7 @@ endpointLoop:
 	return nil, errNotFound
 }
 
-func (r *registryRouter) getHandler(services []*registry.Service) string {
+func (r *registryRouter) handler(services []*registry.Service) string {
 	// check if service handler
 	for i := range services {
 		endpoints := services[i].Endpoints
@@ -546,6 +547,27 @@ func (r *registryRouter) getHandler(services []*registry.Service) string {
 		return "rpc"
 	}
 	return r.opts.Handler
+}
+
+func (r *registryRouter) services(rp *resolver.Endpoint) ([]*registry.Service, error) {
+	// trigger an endpoint refresh
+	select {
+	case r.refreshChan <- rp.Domain:
+	default:
+	}
+
+	for {
+		services, err := r.rc.GetService(rp.Name, registry.GetDomain(rp.Domain))
+		if err == nil {
+			return services, err
+		}
+		if !strings.Contains(rp.Name, ".") {
+			return []*registry.Service{}, err
+		}
+		// adapter web service
+		u := strings.Split(strings.Join([]string{rp.Name, rp.Method}, "."), ".")
+		rp.Name, rp.Method = u[0], strings.Join(u[1:], ".")
+	}
 }
 
 func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
@@ -568,8 +590,6 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	// service name
-	name := rp.Name
 
 	// trigger an endpoint refresh
 	select {
@@ -578,18 +598,18 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	}
 
 	// get service
-	services, err := r.rc.GetService(name, registry.GetDomain(rp.Domain))
+	services, err := r.services(rp)
 	if err != nil {
 		return nil, err
 	}
 
 	// only use endpoint matching when the meta handler is set aka api.Default
-	switch h := r.getHandler(services); h {
+	switch h := r.handler(services); h {
 	// rpc handlers
 	case "api", "rpc":
 		// construct api service
 		return &api.Service{
-			Name: name,
+			Name: rp.Name,
 			Endpoint: &api.Endpoint{
 				Name:    rp.Method,
 				Handler: h,
@@ -600,7 +620,7 @@ func (r *registryRouter) Route(req *http.Request) (*api.Service, error) {
 	case "http", "proxy", "web":
 		// construct api service
 		return &api.Service{
-			Name: name,
+			Name: rp.Name,
 			Endpoint: &api.Endpoint{
 				Name:    req.URL.String(),
 				Handler: h,
