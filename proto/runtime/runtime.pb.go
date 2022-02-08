@@ -7,10 +7,6 @@
 package runtime
 
 import (
-	context "context"
-	grpc "google.golang.org/grpc"
-	codes "google.golang.org/grpc/codes"
-	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -2310,6 +2306,7 @@ func file_proto_runtime_runtime_proto_init() {
 	file_proto_runtime_runtime_proto_goTypes = nil
 	file_proto_runtime_runtime_proto_depIdxs = nil
 }
+<<<<<<< HEAD
 
 // Reference imports to suppress errors if they are not otherwise used.
 var _ context.Context
@@ -2767,3 +2764,5 @@ var _Build_serviceDesc = grpc.ServiceDesc{
 	},
 	Metadata: "proto/runtime/runtime.proto",
 }
+=======
+>>>>>>> upstream/master
