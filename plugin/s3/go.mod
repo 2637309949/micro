@@ -1,4 +1,4 @@
-module github.com/micro/micro/plugin/s3/v3
+module github.com/2637309949/micro/plugin/s3/v3
 
 go 1.15
 
