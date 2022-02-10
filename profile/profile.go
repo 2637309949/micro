@@ -8,37 +8,46 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/2637309949/micro/v3/plugin/etcd"
+	"github.com/2637309949/micro/v3/plugin/postgres"
+	"github.com/2637309949/micro/v3/plugin/prometheus"
+	redisBroker "github.com/2637309949/micro/v3/plugin/redis/broker"
+	redisstream "github.com/2637309949/micro/v3/plugin/redis/stream"
+	microAuth "github.com/2637309949/micro/v3/service/auth"
 	"github.com/2637309949/micro/v3/service/auth/jwt"
 	"github.com/2637309949/micro/v3/service/auth/noop"
 	"github.com/2637309949/micro/v3/service/broker"
 	memBroker "github.com/2637309949/micro/v3/service/broker/memory"
+	microBuilder "github.com/2637309949/micro/v3/service/build"
 	"github.com/2637309949/micro/v3/service/build/golang"
 	"github.com/2637309949/micro/v3/service/client"
+	"github.com/2637309949/micro/v3/service/events"
+	microEvents "github.com/2637309949/micro/v3/service/events"
 	evStore "github.com/2637309949/micro/v3/service/events/store"
 	memStream "github.com/2637309949/micro/v3/service/events/stream/memory"
 	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/metrics"
 	"github.com/2637309949/micro/v3/service/model"
 	"github.com/2637309949/micro/v3/service/registry"
 	"github.com/2637309949/micro/v3/service/registry/memory"
 	"github.com/2637309949/micro/v3/service/router"
 	k8sRouter "github.com/2637309949/micro/v3/service/router/kubernetes"
 	regRouter "github.com/2637309949/micro/v3/service/router/registry"
+	microRuntime "github.com/2637309949/micro/v3/service/runtime"
 	"github.com/2637309949/micro/v3/service/runtime/kubernetes"
 	"github.com/2637309949/micro/v3/service/runtime/local"
 	"github.com/2637309949/micro/v3/service/server"
+	"github.com/2637309949/micro/v3/service/store"
+	microStore "github.com/2637309949/micro/v3/service/store"
 	"github.com/2637309949/micro/v3/service/store/file"
 	mem "github.com/2637309949/micro/v3/service/store/memory"
+	inAuth "github.com/2637309949/micro/v3/util/auth"
 	"github.com/2637309949/micro/v3/util/opentelemetry"
 	"github.com/2637309949/micro/v3/util/opentelemetry/jaeger"
-	"github.com/urfave/cli/v2"
-
-	microAuth "github.com/2637309949/micro/v3/service/auth"
-	microBuilder "github.com/2637309949/micro/v3/service/build"
-	microEvents "github.com/2637309949/micro/v3/service/events"
-	microRuntime "github.com/2637309949/micro/v3/service/runtime"
-	microStore "github.com/2637309949/micro/v3/service/store"
-	inAuth "github.com/2637309949/micro/v3/util/auth"
 	"github.com/2637309949/micro/v3/util/user"
+	"github.com/go-redis/redis/v8"
+	"github.com/opentracing/opentracing-go"
+	"github.com/urfave/cli/v2"
 )
 
 // profiles which when called will configure micro to run in that environment
@@ -104,7 +113,6 @@ var Local = &Profile{
 			registry.DefaultRegistry.Init(
 				registry.Addrs("localhost:8000"),
 			)
-
 			SetupRegistry(registry.DefaultRegistry)
 		}
 
@@ -160,36 +168,36 @@ var Local = &Profile{
 	},
 }
 
-// staging profile to run staging
+// staging profile to run in staging env
+// reference: https://github.com/m3o/platform/blob/master/profile/platform/platform.go
 var Staging = &Profile{
 	Name: "staging",
 	Setup: func(ctx *cli.Context) error {
 		microAuth.DefaultAuth = jwt.NewAuth()
-		microStore.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
+		store.DefaultStore = postgres.NewStore(store.Nodes(ctx.String("store_address")))
+		SetupBroker(redisBroker.NewBroker(broker.Addrs(ctx.String("broker_address"))))
+		SetupRegistry(etcd.NewRegistry(registry.Addrs(ctx.String("registry_address"))))
 		SetupConfigSecretKey(ctx)
 		SetupJWT(ctx)
 
-		// the registry service uses the memory registry, the other core services will use the default
-		// rpc client and call the registry service
-		if ctx.Args().Get(1) == "registry" {
-			SetupRegistry(memory.NewRegistry())
-		} else {
-			// set the registry address
-			registry.DefaultRegistry.Init(
-				registry.Addrs("localhost:8000"),
-			)
-			SetupRegistry(registry.DefaultRegistry)
+		// Set up a default metrics reporter (being careful not to clash with any that have already been set):
+		if !metrics.IsSet() {
+			prometheusReporter, err := prometheus.New()
+			if err != nil {
+				logger.Fatalf("Error configuring prometheus: %v", err)
+			}
+			metrics.SetDefaultMetricsReporter(prometheusReporter)
 		}
 
-		// the broker service uses the memory broker, the other core services will use the default
-		// rpc client and call the broker service
-		if ctx.Args().Get(1) == "broker" {
-			SetupBroker(memBroker.NewBroker())
-		} else {
-			broker.DefaultBroker.Init(
-				broker.Addrs("localhost:8003"),
+		var err error
+		if ctx.Args().Get(1) == "events" {
+			events.DefaultStream, err = redisstream.NewStream(redisStreamOpts(ctx)...)
+			if err != nil {
+				logger.Fatalf("Error configuring stream: %v", err)
+			}
+			events.DefaultStore = evStore.NewStore(
+				evStore.WithStore(store.DefaultStore),
 			)
-			SetupBroker(broker.DefaultBroker)
 		}
 
 		// set the store in the model
@@ -201,18 +209,14 @@ var Staging = &Profile{
 		// the runtime builder should NOT be set when using this implementation
 		microRuntime.DefaultRuntime = local.NewRuntime()
 
-		var err error
-		microEvents.DefaultStream, err = memStream.NewStream()
-		if err != nil {
-			logger.Fatalf("Error configuring stream: %v", err)
-		}
-		microEvents.DefaultStore = evStore.NewStore(
-			evStore.WithStore(microStore.DefaultStore),
-		)
-
 		microStore.DefaultBlobStore, err = file.NewBlobStore()
 		if err != nil {
 			logger.Fatalf("Error configuring file blob store: %v", err)
+		}
+
+		reporterAddress := os.Getenv("MICRO_TRACING_REPORTER_ADDRESS")
+		if len(reporterAddress) == 0 {
+			reporterAddress = jaeger.DefaultReporterAddress
 		}
 
 		// Configure tracing with Jaeger (forced tracing):
@@ -223,14 +227,36 @@ var Staging = &Profile{
 		openTracer, _, err := jaeger.New(
 			opentelemetry.WithServiceName(tracingServiceName),
 			opentelemetry.WithSamplingRate(1),
+			opentelemetry.WithTraceReporterAddress(reporterAddress),
 		)
 		if err != nil {
 			logger.Fatalf("Error configuring opentracing: %v", err)
 		}
 		opentelemetry.DefaultOpenTracer = openTracer
+		opentracing.SetGlobalTracer(openTracer)
 
 		return nil
 	},
+}
+
+// natsStreamOpts returns a slice of options which should be used to configure nats
+func redisStreamOpts(ctx *cli.Context) []redisstream.Option {
+	fullAddr := ctx.String("broker_address")
+	o, err := redis.ParseURL(fullAddr)
+	if err != nil {
+		logger.Fatalf("Error configuring redis connection, failed to parse %s", fullAddr)
+	}
+
+	opts := []redisstream.Option{
+		redisstream.Address(o.Addr),
+		redisstream.User(o.Username),
+		redisstream.Password(o.Password),
+	}
+	if o.TLSConfig != nil {
+		opts = append(opts, redisstream.TLSConfig(o.TLSConfig))
+	}
+
+	return opts
 }
 
 // Kubernetes profile to run on kubernetes with zero deps. Designed for use with the micro helm chart

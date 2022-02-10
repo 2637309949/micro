@@ -31,10 +31,10 @@ import (
 
 	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/service/registry"
+	"github.com/etcd-io/etcd/clientv3"
+	"github.com/etcd-io/etcd/etcdserver/api/v3rpc/rpctypes"
+	"github.com/etcd-io/etcd/mvcc/mvccpb"
 	hash "github.com/mitchellh/hashstructure"
-	"go.etcd.io/etcd/clientv3"
-	"go.etcd.io/etcd/etcdserver/api/v3rpc/rpctypes"
-	"go.etcd.io/etcd/mvcc/mvccpb"
 	"go.uber.org/zap"
 )
 
