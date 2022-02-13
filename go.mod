@@ -11,7 +11,6 @@ require (
 	github.com/chzyer/logex v1.2.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e
 	github.com/chzyer/test v0.0.0-20210722231415-061457976a23 // indirect
-	github.com/coreos/bbolt v0.0.0-00010101000000-000000000000 // indirect
 	github.com/coreos/etcd v3.3.27+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
 	github.com/coreos/go-systemd v0.0.0-20191104093116-d3cd4ed1dbcf // indirect
@@ -79,7 +78,5 @@ require (
 	google.golang.org/protobuf v1.25.0
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )
-
-replace github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.5
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
