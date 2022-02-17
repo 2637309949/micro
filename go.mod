@@ -18,7 +18,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
 	github.com/dustin/go-humanize v1.0.0
-	github.com/etcd-io/etcd v3.3.27+incompatible
 	github.com/evanphx/json-patch/v5 v5.0.0
 	github.com/fatih/camelcase v1.0.0
 	github.com/fsnotify/fsnotify v1.4.9
@@ -27,18 +26,14 @@ require (
 	github.com/go-redis/redis/v8 v8.10.1-0.20210615084835-43ec1464d9a6
 	github.com/gofrs/uuid v3.2.0+incompatible
 	github.com/golang-jwt/jwt v0.0.0-20210529014511-0f726ea0e725
-	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/golang/protobuf v1.4.3
+	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/handlers v1.4.2
 	github.com/gorilla/mux v1.7.3
 	github.com/gorilla/websocket v1.4.2
-	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
-	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/hashicorp/go-version v1.2.1
 	github.com/hpcloud/tail v1.0.0
 	github.com/improbable-eng/grpc-web v0.13.0
-	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/kr/pretty v0.2.0
 	github.com/lib/pq v1.10.4
 	github.com/miekg/dns v1.1.27
@@ -53,30 +48,30 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.1.0
+	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
-	github.com/soheilhy/cmux v0.1.5 // indirect
 	github.com/stoewer/go-strcase v1.2.0
 	github.com/stretchr/objx v0.1.1
 	github.com/stretchr/testify v1.7.0
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
-	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/xanzy/go-gitlab v0.35.1
-	github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2 // indirect
 	github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca
 	go.etcd.io/bbolt v1.3.6
 	go.etcd.io/etcd v3.3.27+incompatible
-	go.uber.org/zap v1.16.0
+	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
-	google.golang.org/genproto v0.0.0-20200806141610-86f49bd18e98
+	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
 	google.golang.org/grpc v1.40.0
-	google.golang.org/protobuf v1.25.0
-	sigs.k8s.io/yaml v1.3.0 // indirect
+	google.golang.org/grpc/examples v0.0.0-20220215234149-ec717cad7395
+	google.golang.org/protobuf v1.26.0
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
 
-replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
+replace github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.5
+
+replace go.etcd.io/etcd/clientv3 => go.etcd.io/etcd/client/v3 v3.5.2
