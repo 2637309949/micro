@@ -40,7 +40,7 @@ go get github.com/2637309949/micro/v3/cmd/protoc-gen-micro
 Using Go:
 
 ```sh
-go get github.com/2637309949/micro/v3
+go get github.com/2637309949/micro/v3@latest
 ```
 
 ### Release Binary
