@@ -22,7 +22,6 @@ import (
 	"github.com/2637309949/micro/v3/service/build/golang"
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/events"
-	microEvents "github.com/2637309949/micro/v3/service/events"
 	evStore "github.com/2637309949/micro/v3/service/events/store"
 	memStream "github.com/2637309949/micro/v3/service/events/stream/memory"
 	"github.com/2637309949/micro/v3/service/logger"
@@ -38,7 +37,6 @@ import (
 	"github.com/2637309949/micro/v3/service/runtime/local"
 	"github.com/2637309949/micro/v3/service/server"
 	"github.com/2637309949/micro/v3/service/store"
-	microStore "github.com/2637309949/micro/v3/service/store"
 	"github.com/2637309949/micro/v3/service/store/file"
 	mem "github.com/2637309949/micro/v3/service/store/memory"
 	inAuth "github.com/2637309949/micro/v3/util/auth"
@@ -100,7 +98,7 @@ var Local = &Profile{
 	Name: "local",
 	Setup: func(ctx *cli.Context) error {
 		microAuth.DefaultAuth = jwt.NewAuth()
-		microStore.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
+		store.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
 		SetupConfigSecretKey(ctx)
 		SetupJWT(ctx)
 
@@ -129,7 +127,7 @@ var Local = &Profile{
 
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
-			model.WithStore(microStore.DefaultStore),
+			model.WithStore(store.DefaultStore),
 		)
 
 		// use the local runtime, note: the local runtime is designed to run source code directly so
@@ -137,15 +135,15 @@ var Local = &Profile{
 		microRuntime.DefaultRuntime = local.NewRuntime()
 
 		var err error
-		microEvents.DefaultStream, err = memStream.NewStream()
+		events.DefaultStream, err = memStream.NewStream()
 		if err != nil {
 			logger.Fatalf("Error configuring stream: %v", err)
 		}
-		microEvents.DefaultStore = evStore.NewStore(
-			evStore.WithStore(microStore.DefaultStore),
+		events.DefaultStore = evStore.NewStore(
+			evStore.WithStore(store.DefaultStore),
 		)
 
-		microStore.DefaultBlobStore, err = file.NewBlobStore()
+		store.DefaultBlobStore, err = file.NewBlobStore()
 		if err != nil {
 			logger.Fatalf("Error configuring file blob store: %v", err)
 		}
@@ -202,14 +200,14 @@ var Staging = &Profile{
 
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
-			model.WithStore(microStore.DefaultStore),
+			model.WithStore(store.DefaultStore),
 		)
 
 		// use the local runtime, note: the local runtime is designed to run source code directly so
 		// the runtime builder should NOT be set when using this implementation
 		microRuntime.DefaultRuntime = local.NewRuntime()
 
-		microStore.DefaultBlobStore, err = file.NewBlobStore()
+		store.DefaultBlobStore, err = file.NewBlobStore()
 		if err != nil {
 			logger.Fatalf("Error configuring file blob store: %v", err)
 		}
@@ -272,20 +270,20 @@ var Kubernetes = &Profile{
 			logger.Fatalf("Error configuring golang builder: %v", err)
 		}
 
-		microEvents.DefaultStream, err = memStream.NewStream()
+		events.DefaultStream, err = memStream.NewStream()
 		if err != nil {
 			logger.Fatalf("Error configuring stream: %v", err)
 		}
 
-		microStore.DefaultStore = file.NewStore(file.WithDir("/store"))
-		microStore.DefaultBlobStore, err = file.NewBlobStore(file.WithDir("/store/blob"))
+		store.DefaultStore = file.NewStore(file.WithDir("/store"))
+		store.DefaultBlobStore, err = file.NewBlobStore(file.WithDir("/store/blob"))
 		if err != nil {
 			logger.Fatalf("Error configuring file blob store: %v", err)
 		}
 
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
-			model.WithStore(microStore.DefaultStore),
+			model.WithStore(store.DefaultStore),
 		)
 
 		// the registry service uses the memory registry, the other core services will use the default
@@ -335,12 +333,12 @@ var Test = &Profile{
 	Name: "test",
 	Setup: func(ctx *cli.Context) error {
 		microAuth.DefaultAuth = noop.NewAuth()
-		microStore.DefaultStore = mem.NewStore()
-		microStore.DefaultBlobStore, _ = file.NewBlobStore()
+		store.DefaultStore = mem.NewStore()
+		store.DefaultBlobStore, _ = file.NewBlobStore()
 		SetupRegistry(memory.NewRegistry())
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
-			model.WithStore(microStore.DefaultStore),
+			model.WithStore(store.DefaultStore),
 		)
 		return nil
 	},
