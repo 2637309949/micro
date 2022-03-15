@@ -4,12 +4,15 @@ Micro is an API first development platform.
 
 ## New feature
 
+- [Third Party authentication](https://github.com/2637309949/go-service/tree/master/cas-service)
 - Support global tracing, request id for api gateway
 - Support web service, proxy from api gateway 
 - Support std restful response 
 - Support rpc with account
 - Support rotate logs
 - Optimize dashboard
+- Staging/Local model
+- New micro boilerplate
 
 ## Authentication advice
 
