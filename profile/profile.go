@@ -172,11 +172,14 @@ var Staging = &Profile{
 	Name: "staging",
 	Setup: func(ctx *cli.Context) error {
 		microAuth.DefaultAuth = jwt.NewAuth()
+		// the cockroach store will connect immediately so the address must be passed
+		// when the store is created. The cockroach store address contains the location
+		// of certs so it can't be defaulted like the broker and registry.
 		store.DefaultStore = postgres.NewStore(store.Nodes(ctx.String("store_address")))
 		SetupBroker(redisBroker.NewBroker(broker.Addrs(ctx.String("broker_address"))))
 		SetupRegistry(etcd.NewRegistry(registry.Addrs(ctx.String("registry_address"))))
-		SetupConfigSecretKey(ctx)
 		SetupJWT(ctx)
+		SetupConfigSecretKey(ctx)
 
 		// Set up a default metrics reporter (being careful not to clash with any that have already been set):
 		if !metrics.IsSet() {
@@ -198,19 +201,18 @@ var Staging = &Profile{
 			)
 		}
 
+		// only configure the blob store for the store and runtime services
+		if ctx.Args().Get(1) == "runtime" || ctx.Args().Get(1) == "store" {
+			store.DefaultBlobStore, err = file.NewBlobStore()
+			if err != nil {
+				logger.Fatalf("Error configuring file blob store: %v", err)
+			}
+		}
+
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
 			model.WithStore(store.DefaultStore),
 		)
-
-		// use the local runtime, note: the local runtime is designed to run source code directly so
-		// the runtime builder should NOT be set when using this implementation
-		microRuntime.DefaultRuntime = local.NewRuntime()
-
-		store.DefaultBlobStore, err = file.NewBlobStore()
-		if err != nil {
-			logger.Fatalf("Error configuring file blob store: %v", err)
-		}
 
 		reporterAddress := os.Getenv("MICRO_TRACING_REPORTER_ADDRESS")
 		if len(reporterAddress) == 0 {
@@ -233,6 +235,9 @@ var Staging = &Profile{
 		opentelemetry.DefaultOpenTracer = openTracer
 		opentracing.SetGlobalTracer(openTracer)
 
+		// use the local runtime, note: the local runtime is designed to run source code directly so
+		// the runtime builder should NOT be set when using this implementation
+		microRuntime.DefaultRuntime = local.NewRuntime()
 		return nil
 	},
 }
