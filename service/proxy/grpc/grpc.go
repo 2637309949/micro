@@ -103,7 +103,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 	endpoint := req.Endpoint()
 
 	if len(service) == 0 {
-		return errors.BadRequest("service name is blank")
+		return errors.BadRequest("go.micro.proxy", "service name is blank")
 	}
 
 	if logger.V(logger.TraceLevel, logger.DefaultLogger) {

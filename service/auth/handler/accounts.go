@@ -34,7 +34,7 @@ func (a *Auth) List(ctx context.Context, req *pb.ListAccountsRequest, rsp *pb.Li
 	key := strings.Join([]string{storePrefixAccounts, req.Options.Namespace, ""}, joinKey)
 	recs, err := a.Options.Store.Read(key, store.ReadPrefix())
 	if err != nil {
-		return errors.InternalServerError("Unable to read from store: %v", err)
+		return errors.InternalServerError("auth.Accounts.List", "Unable to read from store: %v", err)
 	}
 
 	// unmarshal the records
@@ -42,7 +42,7 @@ func (a *Auth) List(ctx context.Context, req *pb.ListAccountsRequest, rsp *pb.Li
 	for _, rec := range recs {
 		var r *auth.Account
 		if err := json.Unmarshal(rec.Value, &r); err != nil {
-			return errors.InternalServerError("Error to unmarshaling json: %v. Value: %v", err, string(rec.Value))
+			return errors.InternalServerError("auth.Accounts.List", "Error to unmarshaling json: %v. Value: %v", err, string(rec.Value))
 		}
 		accounts = append(accounts, r)
 	}
@@ -60,12 +60,12 @@ func (a *Auth) List(ctx context.Context, req *pb.ListAccountsRequest, rsp *pb.Li
 func (a *Auth) Delete(ctx context.Context, req *pb.DeleteAccountRequest, rsp *pb.DeleteAccountResponse) error {
 	// validate the request
 	if len(req.Id) == 0 {
-		return errors.BadRequest("Missing ID")
+		return errors.BadRequest("auth.Accounts.Delete", "Missing ID")
 	}
 
 	acc, ok := auth.AccountFromContext(ctx)
 	if !ok {
-		return errors.Unauthorized("Unauthorized")
+		return errors.Unauthorized("auth.Accounts.Delete", "Unauthorized")
 	}
 
 	// set defaults
@@ -88,28 +88,28 @@ func (a *Auth) Delete(ctx context.Context, req *pb.DeleteAccountRequest, rsp *pb
 	}
 
 	if req.Id == acc.ID || req.Id == acc.Name {
-		return errors.BadRequest("Can't delete your own account")
+		return errors.BadRequest("auth.Accounts.Delete", "Can't delete your own account")
 	}
 
 	// delete the refresh token linked to the account
 	tok, err := a.refreshTokenForAccount(req.Options.Namespace, accToDelete.ID)
 	if err != nil {
-		return errors.InternalServerError("Error finding refresh token")
+		return errors.InternalServerError("auth.Accounts.Delete", "Error finding refresh token")
 	}
 	refreshKey := strings.Join([]string{storePrefixRefreshTokens, req.Options.Namespace, accToDelete.ID, tok}, joinKey)
 	if err := a.Options.Store.Delete(refreshKey); err != nil {
-		return errors.InternalServerError("Error deleting refresh token: %v", err)
+		return errors.InternalServerError("auth.Accounts.Delete", "Error deleting refresh token: %v", err)
 	}
 
 	key := strings.Join([]string{storePrefixAccounts, req.Options.Namespace, accToDelete.ID}, joinKey)
 	// delete the account
 	if err := a.Options.Store.Delete(key); err != nil {
-		return errors.BadRequest("Error deleting account: %v", err)
+		return errors.BadRequest("auth.Accounts.Delete", "Error deleting account: %v", err)
 	}
 	keyByName := strings.Join([]string{storePrefixAccountsByName, req.Options.Namespace, accToDelete.Name}, joinKey)
 	// delete the account
 	if err := a.Options.Store.Delete(keyByName); err != nil {
-		return errors.BadRequest("Error deleting account: %v", err)
+		return errors.BadRequest("auth.Accounts.Delete", "Error deleting account: %v", err)
 	}
 
 	// Clear the namespace cache, since the accounts for this namespace could now be empty
@@ -132,7 +132,7 @@ func hasScope(scope string, scopes []string) bool {
 // ChangeSecret by providing a refresh token and a new secret
 func (a *Auth) ChangeSecret(ctx context.Context, req *pb.ChangeSecretRequest, rsp *pb.ChangeSecretResponse) error {
 	if len(req.NewSecret) == 0 {
-		return errors.BadRequest("New secret should not be blank")
+		return errors.BadRequest("auth.Auth.ChangeSecret", "New secret should not be blank")
 	}
 
 	// set defaults
@@ -171,31 +171,31 @@ func (a *Auth) ChangeSecret(ctx context.Context, req *pb.ChangeSecretRequest, rs
 	// This will enable both micro admins and services to change secrets on behalf of their users.
 	if !((callerAcc.Issuer == namespace.DefaultNamespace && isAdmin(callerAcc.Scopes)) || (callerAcc.Type == "service" && callerAcc.Issuer == req.Options.Namespace)) {
 		if !secretsMatch(acc.Secret, req.OldSecret) {
-			return errors.BadRequest("Secret not correct")
+			return errors.BadRequest("auth.Accounts.ChangeSecret", "Secret not correct")
 		}
 	}
 
 	// hash the secret
 	secret, err := hashSecret(req.NewSecret)
 	if err != nil {
-		return errors.InternalServerError("Unable to hash password: %v", err)
+		return errors.InternalServerError("auth.Accounts.ChangeSecret", "Unable to hash password: %v", err)
 	}
 	acc.Secret = secret
 
 	// marshal to json
 	bytes, err := json.Marshal(acc)
 	if err != nil {
-		return errors.InternalServerError("Unable to marshal json: %v", err)
+		return errors.InternalServerError("auth.Accounts.ChangeSecret", "Unable to marshal json: %v", err)
 	}
 
 	key := strings.Join([]string{storePrefixAccounts, acc.Issuer, acc.ID}, joinKey)
 	// write to the store
 	if err := a.Options.Store.Write(&store.Record{Key: key, Value: bytes}); err != nil {
-		return errors.InternalServerError("Unable to write account to store: %v", err)
+		return errors.InternalServerError("auth.Accounts.ChangeSecret", "Unable to write account to store: %v", err)
 	}
 	usernameKey := strings.Join([]string{storePrefixAccountsByName, acc.Issuer, acc.Name}, joinKey)
 	if err := a.Options.Store.Write(&store.Record{Key: usernameKey, Value: bytes}); err != nil {
-		return errors.InternalServerError("Unable to write account to store: %v", err)
+		return errors.InternalServerError("auth.Accounts.ChangeSecret", "Unable to write account to store: %v", err)
 	}
 
 	return nil

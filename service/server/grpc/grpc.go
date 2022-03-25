@@ -231,7 +231,7 @@ func (g *grpcServer) handler(srv interface{}, stream grpc.ServerStream) (err err
 				logger.Error("panic recovered: ", r)
 				logger.Error(string(debug.Stack()))
 			}
-			err = errors.InternalServerError("panic recovered: %v", r)
+			err = errors.InternalServerError(g.opts.Name, "panic recovered: %v", r)
 		} else if err != nil {
 			if logger.V(logger.InfoLevel, logger.DefaultLogger) {
 				logger.Errorf("grpc handler got error: %s", err)
@@ -304,7 +304,7 @@ func (g *grpcServer) handler(srv interface{}, stream grpc.ServerStream) (err err
 	if g.opts.Router != nil {
 		cc, err := g.newGRPCCodec(ct)
 		if err != nil {
-			return errors.InternalServerError(err.Error())
+			return errors.InternalServerError(g.opts.Name, err.Error())
 		}
 		codec := &grpcCodec{
 			ServerStream: stream,
@@ -462,7 +462,7 @@ func (g *grpcServer) processRequest(stream grpc.ServerStream, service *service, 
 
 		cc, err := g.newGRPCCodec(ct)
 		if err != nil {
-			return errors.InternalServerError(err.Error())
+			return errors.InternalServerError(g.opts.Name, err.Error())
 		}
 		b, err := cc.Marshal(argv.Interface())
 		if err != nil {
@@ -504,6 +504,7 @@ func (g *grpcServer) processRequest(stream grpc.ServerStream, service *service, 
 			switch verr := appErr.(type) {
 			case *errors.Error:
 				perr := &pberr.Error{
+					Id:        verr.Id,
 					RequestId: verr.RequestId,
 					Code:      verr.Code,
 					Detail:    verr.Detail,
@@ -585,6 +586,7 @@ func (g *grpcServer) processStream(stream grpc.ServerStream, service *service, m
 		switch verr := appErr.(type) {
 		case *errors.Error:
 			perr := &pberr.Error{
+				Id:        verr.Id,
 				RequestId: verr.RequestId,
 				Code:      verr.Code,
 				Detail:    verr.Detail,

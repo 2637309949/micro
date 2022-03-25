@@ -83,16 +83,16 @@ func AuthHandler() server.HandlerWrapper {
 				case strings.HasPrefix(header, "Basic "):
 					b, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(header, "Basic "))
 					if err != nil {
-						return errors.Unauthorized("invalid authorization header. Incorrect format")
+						return errors.Unauthorized(req.Service(), "invalid authorization header. Incorrect format")
 					}
 					parts := strings.SplitN(string(b), ":", 2)
 					if len(parts) != 2 {
-						return errors.Unauthorized("invalid authorization header. Incorrect format")
+						return errors.Unauthorized(req.Service(), "invalid authorization header. Incorrect format")
 					}
 
 					token = parts[1]
 				default:
-					return errors.Unauthorized("invalid authorization header. Expected Bearer or Basic schema")
+					return errors.Unauthorized(req.Service(), "invalid authorization header. Expected Bearer or Basic schema")
 				}
 			}
 
@@ -115,11 +115,11 @@ func AuthHandler() server.HandlerWrapper {
 			// Verify the caller has access to the resource.
 			err := auth.Verify(acc, res, auth.VerifyNamespace(ns))
 			if err == auth.ErrForbidden && acc != nil {
-				return errors.Forbidden("Forbidden call made to %v:%v by %v", req.Service(), req.Endpoint(), acc.ID)
+				return errors.Forbidden(req.Service(), "Forbidden call made to %v:%v by %v", req.Service(), req.Endpoint(), acc.ID)
 			} else if err == auth.ErrForbidden {
-				return errors.Unauthorized("Unauthorized call made to %v:%v", req.Service(), req.Endpoint())
+				return errors.Unauthorized(req.Service(), "Unauthorized call made to %v:%v", req.Service(), req.Endpoint())
 			} else if err != nil {
-				return errors.InternalServerError("Error authorizing request: %v", err)
+				return errors.InternalServerError(req.Service(), "Error authorizing request: %v", err)
 			}
 
 			// The user is authorised, allow the call

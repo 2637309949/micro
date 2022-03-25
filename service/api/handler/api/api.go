@@ -48,6 +48,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, bsize)
 	request, err := requestToProto(r)
 	if err != nil {
+		err := errors.InternalServerError("go.micro.api", err.Error())
 		uhttp.WriteError(w, r, err)
 		return
 	}
@@ -61,13 +62,14 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// try get service from router
 		s, err := a.opts.Router.Route(r)
 		if err != nil {
+			err := errors.InternalServerError("go.micro.api", err.Error())
 			uhttp.WriteError(w, r, err)
 			return
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
-		er := errors.InternalServerError("no route found")
+		er := errors.InternalServerError("go.micro.api", "no route found")
 		uhttp.WriteError(w, r, er)
 		return
 	}

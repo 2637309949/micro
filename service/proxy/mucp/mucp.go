@@ -199,7 +199,7 @@ func (p *Proxy) getLink(r router.Route) (client.Client, error) {
 	}
 	l, ok := p.Links[r.Link]
 	if !ok {
-		return nil, errors.InternalServerError("link not found")
+		return nil, errors.InternalServerError("go.micro.proxy", "link not found")
 	}
 	return l, nil
 }
@@ -379,7 +379,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 	endpoint := req.Endpoint()
 
 	if len(service) == 0 {
-		return errors.BadRequest("service name is blank")
+		return errors.BadRequest("go.micro.proxy", "service name is blank")
 	}
 
 	if logger.V(logger.TraceLevel, logger.DefaultLogger) {
@@ -459,7 +459,7 @@ func (p *Proxy) ServeRequest(ctx context.Context, req server.Request, rsp server
 
 	// we're assuming we need routes to operate on
 	if len(routes) == 0 {
-		return errors.InternalServerError("route not found")
+		return errors.InternalServerError("go.micro.proxy", "route not found")
 	}
 
 	var gerr error
@@ -536,7 +536,7 @@ func (p *Proxy) serveRequest(ctx context.Context, link client.Client, service, e
 
 	// new context with cancel
 	ctx, cancel := context.WithCancel(ctx)
-
+	defer cancel()
 	// create new stream
 	stream, err := link.Stream(ctx, creq, opts...)
 	if err != nil {

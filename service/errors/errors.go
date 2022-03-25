@@ -24,9 +24,10 @@ import (
 
 type Error struct {
 	RequestId string `json:"request_id,omitempty"`
-	Code      int32  `json:"code,omitempty"`
 	Detail    string `json:"detail,omitempty"`
 	Status    string `json:"status,omitempty"`
+	Code      int32  `json:"code,omitempty"`
+	Id        string `json:"id,omitempty"`
 }
 
 func (e *Error) Error() string {
@@ -35,8 +36,9 @@ func (e *Error) Error() string {
 }
 
 // New generates a custom error.
-func New(detail string, code int32) error {
+func New(id, detail string, code int32) error {
 	return &Error{
+		Id:     id,
 		Code:   code,
 		Detail: detail,
 		Status: http.StatusText(int(code)),
@@ -62,24 +64,26 @@ func Parse(err string, id ...string) *Error {
 	if e1 := json.Unmarshal([]byte(err), e); e1 != nil {
 		e.Detail = err
 	}
-	if len(id) > 0 && len(e.RequestId) == 0 {
+	if len(id) > 0 {
 		e.RequestId = id[0]
 	}
 	return e
 }
 
 // BadRequest generates a 400 error.
-func BadRequest(format string, a ...interface{}) error {
+func BadRequest(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusBadRequest,
 		Detail: fmt.Sprintf(format, a...),
-		Status: http.StatusText(400),
+		Status: http.StatusText(http.StatusBadRequest),
 	}
 }
 
 // Unauthorized generates a 401 error.
-func Unauthorized(format string, a ...interface{}) error {
+func Unauthorized(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusUnauthorized,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusUnauthorized),
@@ -87,17 +91,19 @@ func Unauthorized(format string, a ...interface{}) error {
 }
 
 // Forbidden generates a 403 error.
-func Forbidden(format string, a ...interface{}) error {
+func Forbidden(id, format string, a ...interface{}) error {
 	return &Error{
-		Code:   403,
+		Id:     id,
+		Code:   http.StatusForbidden,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusForbidden),
 	}
 }
 
 // NotFound generates a 404 error.
-func NotFound(format string, a ...interface{}) error {
+func NotFound(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusNotFound,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusNotFound),
@@ -105,8 +111,9 @@ func NotFound(format string, a ...interface{}) error {
 }
 
 // MethodNotAllowed generates a 405 error.
-func MethodNotAllowed(format string, a ...interface{}) error {
+func MethodNotAllowed(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusMethodNotAllowed,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusMethodNotAllowed),
@@ -114,8 +121,9 @@ func MethodNotAllowed(format string, a ...interface{}) error {
 }
 
 // Timeout generates a 408 error.
-func Timeout(format string, a ...interface{}) error {
+func Timeout(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusRequestTimeout,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusRequestTimeout),
@@ -123,8 +131,9 @@ func Timeout(format string, a ...interface{}) error {
 }
 
 // Conflict generates a 409 error.
-func Conflict(format string, a ...interface{}) error {
+func Conflict(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusConflict,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusConflict),
@@ -132,8 +141,9 @@ func Conflict(format string, a ...interface{}) error {
 }
 
 // InternalServerError generates a 500 error.
-func InternalServerError(format string, a ...interface{}) error {
+func InternalServerError(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusInternalServerError,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusInternalServerError),
@@ -141,8 +151,9 @@ func InternalServerError(format string, a ...interface{}) error {
 }
 
 // NotImplemented generates a 501 error
-func NotImplemented(format string, a ...interface{}) error {
+func NotImplemented(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusNotImplemented,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusNotImplemented),
@@ -150,8 +161,9 @@ func NotImplemented(format string, a ...interface{}) error {
 }
 
 // BadGateway generates a 502 error
-func BadGateway(format string, a ...interface{}) error {
+func BadGateway(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusBadGateway,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusBadGateway),
@@ -159,8 +171,9 @@ func BadGateway(format string, a ...interface{}) error {
 }
 
 // ServiceUnavailable generates a 503 error
-func ServiceUnavailable(format string, a ...interface{}) error {
+func ServiceUnavailable(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusServiceUnavailable,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusServiceUnavailable),
@@ -168,8 +181,9 @@ func ServiceUnavailable(format string, a ...interface{}) error {
 }
 
 // GatewayTimeout generates a 504 error
-func GatewayTimeout(format string, a ...interface{}) error {
+func GatewayTimeout(id, format string, a ...interface{}) error {
 	return &Error{
+		Id:     id,
 		Code:   http.StatusGatewayTimeout,
 		Detail: fmt.Sprintf(format, a...),
 		Status: http.StatusText(http.StatusGatewayTimeout),

@@ -1,13 +1,16 @@
 package helper
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"strings"
 
+	"github.com/2637309949/micro/v3/service/context/metadata"
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,6 +22,15 @@ func ACMEHosts(ctx *cli.Context) []string {
 		}
 	}
 	return hosts
+}
+
+func RequestToContext(r *http.Request) context.Context {
+	ctx := context.Background()
+	md := make(metadata.Metadata)
+	for k, v := range r.Header {
+		md[k] = strings.Join(v, ",")
+	}
+	return metadata.NewContext(ctx, md)
 }
 
 func TLSConfig(ctx *cli.Context) (*tls.Config, error) {

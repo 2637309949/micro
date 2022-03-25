@@ -120,7 +120,7 @@ func (a *Auth) setupDefaultAccount(ns string) error {
 func (a *Auth) Generate(ctx context.Context, req *pb.GenerateRequest, rsp *pb.GenerateResponse) error {
 	// validate the request
 	if len(req.Id) == 0 {
-		return errors.BadRequest("ID required")
+		return errors.BadRequest("auth.Auth.Generate", "ID required")
 	}
 
 	// set the defaults
@@ -145,7 +145,7 @@ func (a *Auth) Generate(ctx context.Context, req *pb.GenerateRequest, rsp *pb.Ge
 	// check the user does not already exists
 	key := strings.Join([]string{storePrefixAccounts, req.Options.Namespace, req.Id}, joinKey)
 	if _, err := a.Options.Store.Read(key); err != store.ErrNotFound {
-		return errors.BadRequest("Account with this ID already exists")
+		return errors.BadRequest("auth", "Account with this ID already exists")
 	}
 
 	// construct the account
@@ -173,8 +173,8 @@ func (a *Auth) Generate(ctx context.Context, req *pb.GenerateRequest, rsp *pb.Ge
 func (a *Auth) createAccount(acc *auth.Account) error {
 	// check the user does not already exists
 	key := strings.Join([]string{storePrefixAccounts, acc.Issuer, acc.ID}, joinKey)
-	if _, err := a.Options.Store.Read(key); err != store.ErrNotFound {
-		return errors.BadRequest("Account with this ID already exists")
+	if _, err := store.Read(key); err != store.ErrNotFound {
+		return errors.BadRequest("auth.Auth.Generate", "Account with this ID already exists")
 	}
 	if acc.Metadata == nil {
 		acc.Metadata = map[string]string{
@@ -193,34 +193,34 @@ func (a *Auth) createAccount(acc *auth.Account) error {
 
 	usernameKey := strings.Join([]string{storePrefixAccountsByName, acc.Issuer, acc.Name}, joinKey)
 	if _, err := a.Options.Store.Read(usernameKey); err != store.ErrNotFound {
-		return errors.BadRequest("Account with this Name already exists")
+		return errors.BadRequest("auth.Auth.Generate", "Account with this Name already exists")
 	}
 
 	// hash the secret
 	secret, err := hashSecret(acc.Secret)
 	if err != nil {
-		return errors.InternalServerError("Unable to hash password: %v", err)
+		return errors.InternalServerError("auth.Auth.Generate", "Unable to hash password: %v", err)
 	}
 	acc.Secret = secret
 
 	// marshal to json
 	bytes, err := json.Marshal(acc)
 	if err != nil {
-		return errors.InternalServerError("Unable to marshal json: %v", err)
+		return errors.InternalServerError("auth.Auth.Generate", "Unable to marshal json: %v", err)
 	}
 
 	// write to the store
 	if err := a.Options.Store.Write(&store.Record{Key: key, Value: bytes}); err != nil {
-		return errors.InternalServerError("Unable to write account to store: %v", err)
+		return errors.InternalServerError("auth.Auth.Generate", "Unable to write account to store: %v", err)
 	}
 
 	if err := a.Options.Store.Write(&store.Record{Key: usernameKey, Value: bytes}); err != nil {
-		return errors.InternalServerError("Unable to write account to store: %v", err)
+		return errors.InternalServerError("auth.Auth.Generate", "Unable to write account to store: %v", err)
 	}
 
 	// set a refresh token
 	if err := a.setRefreshToken(acc.Issuer, acc.ID, uuid.New().String()); err != nil {
-		return errors.InternalServerError("Unable to set a refresh token: %v", err)
+		return errors.InternalServerError("auth.Auth.Generate", "Unable to set a refresh token: %v", err)
 	}
 
 	return nil
@@ -230,9 +230,9 @@ func (a *Auth) createAccount(acc *auth.Account) error {
 func (a *Auth) Inspect(ctx context.Context, req *pb.InspectRequest, rsp *pb.InspectResponse) error {
 	acc, err := a.TokenProvider.Inspect(req.Token)
 	if err == token.ErrInvalidToken || err == token.ErrNotFound {
-		return errors.BadRequest(err.Error())
+		return errors.BadRequest("auth.Auth.Inspect", err.Error())
 	} else if err != nil {
-		return errors.InternalServerError("Unable to inspect token: %v", err)
+		return errors.InternalServerError("auth.Auth.Inspect", "Unable to inspect token: %v", err)
 	}
 
 	rsp.Account = serializeAccount(acc)
@@ -258,7 +258,7 @@ func (a *Auth) Token(ctx context.Context, req *pb.TokenRequest, rsp *pb.TokenRes
 
 	// validate the request
 	if (len(req.Id) == 0 || len(req.Secret) == 0) && len(req.RefreshToken) == 0 {
-		return errors.BadRequest("Credentials or a refresh token required")
+		return errors.BadRequest("auth.Auth.Token", "Credentials or a refresh token required")
 	}
 
 	// check to see if the secret is a JWT. this is a workaround to allow accounts issued
@@ -285,9 +285,9 @@ func (a *Auth) Token(ctx context.Context, req *pb.TokenRequest, rsp *pb.TokenRes
 	if len(req.RefreshToken) > 0 {
 		accID, err := a.accountIDForRefreshToken(req.Options.Namespace, req.RefreshToken)
 		if err == store.ErrNotFound {
-			return errors.BadRequest(auth.ErrInvalidToken.Error())
+			return errors.BadRequest("auth.Auth.Token", auth.ErrInvalidToken.Error())
 		} else if err != nil {
-			return errors.InternalServerError("Unable to lookup token: %v", err)
+			return errors.InternalServerError("auth.Auth.Token", "Unable to lookup token: %v", err)
 		}
 		accountID = accID
 	}
@@ -301,12 +301,12 @@ func (a *Auth) Token(ctx context.Context, req *pb.TokenRequest, rsp *pb.TokenRes
 	// so it can be returned to the user
 	if len(req.RefreshToken) == 0 {
 		if !secretsMatch(acc.Secret, req.Secret) {
-			return errors.BadRequest("Secret not correct")
+			return errors.BadRequest("auth.Auth.Token", "Secret not correct")
 		}
 
 		refreshToken, err = a.refreshTokenForAccount(req.Options.Namespace, acc.ID)
 		if err != nil {
-			return errors.InternalServerError("Unable to get refresh token: %v", err)
+			return errors.InternalServerError("auth.Auth.Token", "Unable to get refresh token: %v", err)
 		}
 	}
 
@@ -314,7 +314,7 @@ func (a *Auth) Token(ctx context.Context, req *pb.TokenRequest, rsp *pb.TokenRes
 	duration := time.Duration(req.TokenExpiry) * time.Second
 	tok, err := a.TokenProvider.Generate(acc, token.WithExpiry(duration))
 	if err != nil {
-		return errors.InternalServerError("Unable to generate token: %v", err)
+		return errors.InternalServerError("auth.Auth.Token", "Unable to generate token: %v", err)
 	}
 
 	rsp.Token = serializeToken(tok, refreshToken)
@@ -326,24 +326,24 @@ func (a *Auth) getAccountForID(id, namespace, errCode string) (*auth.Account, er
 	key := strings.Join([]string{storePrefixAccounts, namespace, id}, joinKey)
 	recs, err := a.Options.Store.Read(key)
 	if err != nil && err != store.ErrNotFound {
-		return nil, errors.InternalServerError("Unable to read from store: %v", err)
+		return nil, errors.InternalServerError(errCode, "Unable to read from store: %v", err)
 	}
 	if err == store.ErrNotFound {
 		// maybe id is the username and not the actual ID
 		key = strings.Join([]string{storePrefixAccountsByName, namespace, id}, joinKey)
 		recs, err = a.Options.Store.Read(key)
 		if err == store.ErrNotFound {
-			return nil, errors.BadRequest("Account not found with this ID")
+			return nil, errors.BadRequest(errCode, "Account not found with this ID")
 		}
 		if err != nil {
-			return nil, errors.InternalServerError("Unable to read from store: %v", err)
+			return nil, errors.InternalServerError(errCode, "Unable to read from store: %v", err)
 		}
 	}
 
 	// Unmarshal the record
 	var acc *auth.Account
 	if err := json.Unmarshal(recs[0].Value, &acc); err != nil {
-		return nil, errors.InternalServerError("Unable to unmarshal account: %v", err)
+		return nil, errors.InternalServerError(errCode, "Unable to unmarshal account: %v", err)
 	}
 	return acc, nil
 }

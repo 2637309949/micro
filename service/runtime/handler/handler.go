@@ -57,7 +57,7 @@ func (r *Runtime) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadRes
 	options := toReadOptions(ctx, req.Options)
 	services, err := r.Runtime.Read(options...)
 	if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("runtime.Runtime.Read", err.Error())
 	}
 
 	// serialize the response
@@ -139,7 +139,7 @@ func (r *Runtime) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Cre
 
 	// validate the request
 	if req.Resource == nil || (req.Resource.Namespace == nil && req.Resource.Networkpolicy == nil && req.Resource.Resourcequota == nil && req.Resource.Service == nil) {
-		return errors.BadRequest("blank resource")
+		return errors.BadRequest("runtime.Runtime.Create", "blank resource")
 	}
 
 	// set defaults
@@ -243,7 +243,7 @@ func (r *Runtime) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.Cre
 
 		log.Infof("Creating service %s version %s source %s", service.Name, service.Version, service.Source)
 		if err := r.Runtime.Create(service, options...); err != nil {
-			return errors.InternalServerError(err.Error())
+			return errors.InternalServerError("runtime.Runtime.Create", err.Error())
 		}
 
 		// publish the create event
@@ -268,7 +268,7 @@ func (r *Runtime) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Del
 
 	// validate the request
 	if req.Resource == nil || (req.Resource.Namespace == nil && req.Resource.Networkpolicy == nil && req.Resource.Resourcequota == nil && req.Resource.Service == nil) {
-		return errors.BadRequest("blank resource")
+		return errors.BadRequest("runtime.Runtime.Delete", "blank resource")
 	}
 
 	// set defaults
@@ -362,7 +362,7 @@ func (r *Runtime) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Del
 
 		log.Infof("Deleting service %s version %s source %s", service.Name, service.Version, service.Source)
 		if err := r.Runtime.Delete(service, options...); err != nil {
-			return errors.InternalServerError(err.Error())
+			return errors.InternalServerError("runtime.Runtime.Delete", err.Error())
 		}
 
 		// publish the delete event
@@ -387,9 +387,8 @@ func (r *Runtime) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upd
 
 	// validate the request
 	if req.Resource == nil || (req.Resource.Namespace == nil && req.Resource.Networkpolicy == nil && req.Resource.Resourcequota == nil && req.Resource.Service == nil) {
-		return errors.BadRequest("blank resource")
+		return errors.BadRequest("runtime.Runtime.Update", "blank resource")
 	}
-
 	// set defaults
 	if req.Options == nil {
 		req.Options = &pb.UpdateOptions{}
@@ -475,7 +474,7 @@ func (r *Runtime) Update(ctx context.Context, req *pb.UpdateRequest, rsp *pb.Upd
 		log.Infof("Updating service %s version %s source %s", service.Name, service.Version, service.Source)
 
 		if err := r.Runtime.Update(service, options...); err != nil {
-			return errors.InternalServerError(err.Error())
+			return errors.InternalServerError("runtime.Runtime.Update", err.Error())
 		}
 
 		// publish the update event

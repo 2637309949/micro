@@ -22,22 +22,22 @@ func (b *Build) Read(ctx context.Context, req *pb.Service, stream pb.Build_ReadS
 	// authorize the request
 	acc, ok := auth.AccountFromContext(ctx)
 	if !ok {
-		return errors.Unauthorized("An account is required to read builds")
+		return errors.Unauthorized("runtime.Build.Read", "An account is required to read builds")
 	}
 
 	// validate the request
 	if len(req.Name) == 0 {
-		return errors.BadRequest("Missing name")
+		return errors.BadRequest("runtime.Build.Read", "Missing name")
 	}
 	if len(req.Version) == 0 {
-		return errors.BadRequest("Missing version")
+		return errors.BadRequest("runtime.Build.Read", "Missing version")
 	}
 
 	// lookup the build from the blob store
 	key := fmt.Sprintf("build://%v:%v", req.Name, req.Version)
 	build, err := store.DefaultBlobStore.Read(key, store.BlobNamespace(acc.Issuer))
 	if err == store.ErrNotFound {
-		return errors.NotFound("Build not found")
+		return errors.NotFound("runtime.Build.Read", "Build not found")
 	} else if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (b *Build) Read(ctx context.Context, req *pb.Service, stream pb.Build_ReadS
 		if err == io.EOF {
 			return nil
 		} else if err != nil {
-			return errors.InternalServerError("Error reading build from store: %v", err)
+			return errors.InternalServerError("runtime.Build.Read", "Error reading build from store: %v", err)
 		}
 
 		if err := stream.Send(&pb.BuildReadResponse{Data: buffer[:num]}); err != nil {

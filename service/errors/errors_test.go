@@ -20,21 +20,21 @@ import (
 )
 
 func TestFromError(t *testing.T) {
-	err := NotFound("%s", "example")
+	err := NotFound("go.micro.test", "%s", "example")
 	merr := FromError(err)
-	if merr.Code != 404 {
+	if merr.Id != "go.micro.test" || merr.Code != 404 {
 		t.Fatalf("invalid conversation %v != %v", err, merr)
 	}
 	err = er.New(err.Error())
 	merr = FromError(err)
-	if merr.Code != 404 {
+	if merr.Id != "go.micro.test" || merr.Code != 404 {
 		t.Fatalf("invalid conversation %v != %v", err, merr)
 	}
 }
 
 func TestEqual(t *testing.T) {
-	err1 := NotFound("msg1")
-	err2 := NotFound("msg2")
+	err1 := NotFound("myid1", "msg1")
+	err2 := NotFound("myid2", "msg2")
 
 	if !Equal(err1, err2) {
 		t.Fatal("errors must be equal")
@@ -50,6 +50,7 @@ func TestEqual(t *testing.T) {
 func TestErrors(t *testing.T) {
 	testData := []*Error{
 		{
+			Id:     "test",
 			Code:   500,
 			Detail: "Internal server error",
 			Status: http.StatusText(500),
@@ -57,7 +58,7 @@ func TestErrors(t *testing.T) {
 	}
 
 	for _, e := range testData {
-		ne := New(e.Detail, e.Code)
+		ne := New(e.Id, e.Detail, e.Code)
 
 		if e.Error() != ne.Error() {
 			t.Fatalf("Expected %s got %s", e.Error(), ne.Error())
@@ -67,6 +68,10 @@ func TestErrors(t *testing.T) {
 
 		if pe == nil {
 			t.Fatalf("Expected error got nil %v", pe)
+		}
+
+		if pe.Id != e.Id {
+			t.Fatalf("Expected %s got %s", e.Id, pe.Id)
 		}
 
 		if pe.Detail != e.Detail {

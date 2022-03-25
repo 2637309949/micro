@@ -49,18 +49,20 @@ type webHandler struct {
 func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	service, err := wh.getService(r)
 	if err != nil {
+		err := errors.InternalServerError("go.micro.api", err.Error())
 		uhttp.WriteError(w, r, err)
 		return
 	}
 
 	if len(service) == 0 {
-		er := errors.InternalServerError("not found service")
+		er := errors.InternalServerError("go.micro.api", "not found service")
 		uhttp.WriteError(w, r, er)
 		return
 	}
 
 	rp, err := url.Parse(service)
 	if err != nil {
+		err := errors.InternalServerError("go.micro.api", err.Error())
 		uhttp.WriteError(w, r, err)
 		return
 	}
@@ -100,7 +102,7 @@ func (wh *webHandler) getService(r *http.Request) (string, error) {
 		service = s
 	} else {
 		// we have no way of routing the request
-		return "", errors.InternalServerError("no route found")
+		return "", errors.InternalServerError("go.micro.api", "no route found")
 	}
 
 	// get the nodes
@@ -109,7 +111,7 @@ func (wh *webHandler) getService(r *http.Request) (string, error) {
 		nodes = append(nodes, srv.Nodes...)
 	}
 	if len(nodes) == 0 {
-		return "", errors.InternalServerError("no route found")
+		return "", errors.InternalServerError("go.micro.api", "no route found")
 	}
 
 	// select a random node

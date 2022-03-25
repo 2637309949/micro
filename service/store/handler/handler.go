@@ -47,7 +47,7 @@ func (h *Store) List(ctx context.Context, req *pb.ListRequest, stream pb.Store_L
 
 	// setup the store
 	if err := h.setupTable(req.Options.Database, req.Options.Table); err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.List", err.Error())
 	}
 
 	// setup the options
@@ -77,9 +77,9 @@ func (h *Store) List(ctx context.Context, req *pb.ListRequest, stream pb.Store_L
 	// list from the store
 	vals, err := store.DefaultStore.List(opts...)
 	if err != nil && err == store.ErrNotFound {
-		return errors.NotFound(err.Error())
+		return errors.NotFound("store.Store.List", err.Error())
 	} else if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.List", err.Error())
 	}
 
 	// serialize the response
@@ -94,7 +94,7 @@ func (h *Store) List(ctx context.Context, req *pb.ListRequest, stream pb.Store_L
 		return nil
 	}
 	if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.List", err.Error())
 	}
 	return nil
 }
@@ -119,7 +119,7 @@ func (h *Store) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadRespo
 
 	// setup the store
 	if err := h.setupTable(req.Options.Database, req.Options.Table); err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Read", err.Error())
 	}
 
 	// setup the options
@@ -149,9 +149,9 @@ func (h *Store) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadRespo
 	// read from the database
 	vals, err := store.DefaultStore.Read(req.Key, opts...)
 	if err != nil && err == store.ErrNotFound {
-		return errors.NotFound(err.Error())
+		return errors.NotFound("store.Store.Read", err.Error())
 	} else if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Read", err.Error())
 	}
 
 	// serialize the result
@@ -177,7 +177,7 @@ func (h *Store) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadRespo
 func (h *Store) Write(ctx context.Context, req *pb.WriteRequest, rsp *pb.WriteResponse) error {
 	// validate the request
 	if req.Record == nil {
-		return errors.BadRequest("no record specified")
+		return errors.BadRequest("store.Store.Write", "no record specified")
 	}
 
 	// set defaults
@@ -198,7 +198,7 @@ func (h *Store) Write(ctx context.Context, req *pb.WriteRequest, rsp *pb.WriteRe
 
 	// setup the store
 	if err := h.setupTable(req.Options.Database, req.Options.Table); err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Write", err.Error())
 	}
 
 	// setup the options
@@ -221,9 +221,9 @@ func (h *Store) Write(ctx context.Context, req *pb.WriteRequest, rsp *pb.WriteRe
 	// write to the store
 	err := store.DefaultStore.Write(record, opts...)
 	if err != nil && err == store.ErrNotFound {
-		return errors.NotFound(err.Error())
+		return errors.NotFound("store.Store.Write", err.Error())
 	} else if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Write", err.Error())
 	}
 
 	return nil
@@ -248,7 +248,7 @@ func (h *Store) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Delet
 
 	// setup the store
 	if err := h.setupTable(req.Options.Database, req.Options.Table); err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Delete", err.Error())
 	}
 
 	// setup the options
@@ -258,9 +258,9 @@ func (h *Store) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Delet
 
 	// delete from the store
 	if err := store.DefaultStore.Delete(req.Key, opts...); err == store.ErrNotFound {
-		return errors.NotFound(err.Error())
+		return errors.NotFound("store.Store.Delete", err.Error())
 	} else if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Delete", err.Error())
 	}
 
 	return nil
@@ -280,7 +280,7 @@ func (h *Store) Databases(ctx context.Context, req *pb.DatabasesRequest, rsp *pb
 	}
 	recs, err := store.DefaultStore.Read("databases/", opts...)
 	if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Databases", err.Error())
 	}
 
 	// serialize the response
@@ -313,7 +313,7 @@ func (h *Store) Tables(ctx context.Context, req *pb.TablesRequest, rsp *pb.Table
 	query := fmt.Sprintf("tables/%v/", req.Database)
 	recs, err := store.DefaultStore.Read(query, opts...)
 	if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("store.Store.Tables", err.Error())
 	}
 
 	// serialize the response

@@ -21,7 +21,7 @@ func (s *Store) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadRespo
 
 	// validate the request
 	if len(req.Topic) == 0 {
-		return errors.BadRequest(goevents.ErrMissingTopic.Error())
+		return errors.BadRequest("events.Store.Read", goevents.ErrMissingTopic.Error())
 	}
 
 	// parse options
@@ -36,7 +36,7 @@ func (s *Store) Read(ctx context.Context, req *pb.ReadRequest, rsp *pb.ReadRespo
 	// read from the store
 	result, err := events.DefaultStore.Read(req.Topic, opts...)
 	if err != nil {
-		return errors.InternalServerError(err.Error())
+		return errors.InternalServerError("events.Store.Read", err.Error())
 	}
 
 	// serialize the result

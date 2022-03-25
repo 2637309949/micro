@@ -79,13 +79,15 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// try get service from router
 		s, err := h.opts.Router.Route(r)
 		if err != nil {
-			uhttp.WriteError(w, r, errors.InternalServerError(err.Error()))
+			err = errors.InternalServerError("go.micro.api", err.Error())
+			uhttp.WriteError(w, r, err)
 			return
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
-		uhttp.WriteError(w, r, errors.InternalServerError("no route found"))
+		err := errors.InternalServerError("go.micro.api", "no route found")
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -113,6 +115,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// get payload
 	br, err := api.RequestPayload(r)
 	if err != nil {
+		err = errors.InternalServerError("go.micro.api", err.Error())
 		uhttp.WriteError(w, r, err)
 		return
 	}
@@ -174,6 +177,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// marshall response see https://play.golang.org/p/oBNxUjVTzus
 		rsp, err = response.MarshalJSON()
 		if err != nil {
+			err = errors.InternalServerError("go.micro.api", err.Error())
 			uhttp.WriteError(w, r, err)
 			return
 		}

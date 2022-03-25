@@ -57,10 +57,10 @@ func (a *APIHandler) AddToBlockList(ctx context.Context, request *api.AddToBlock
 	}
 
 	if len(request.Id) == 0 {
-		return errors.BadRequest("Missing ID field")
+		return errors.BadRequest("api.AddToBlockList", "Missing ID field")
 	}
 	if len(request.Namespace) == 0 {
-		return errors.BadRequest("Missing Namespace field")
+		return errors.BadRequest("api.AddToBlockList", "Missing Namespace field")
 	}
 
 	return auth.DefaultBlockList.Add(ctx, request.Id, request.Namespace)
@@ -71,10 +71,10 @@ func (a *APIHandler) RemoveFromBlockList(ctx context.Context, request *api.Remov
 		return err
 	}
 	if len(request.Id) == 0 {
-		return errors.BadRequest("Missing ID field")
+		return errors.BadRequest("api.RemoveFromBlockList", "Missing ID field")
 	}
 	if len(request.Namespace) == 0 {
-		return errors.BadRequest("Missing Namespace field")
+		return errors.BadRequest("api.RemoveFromBlockList", "Missing Namespace field")
 	}
 
 	return auth.DefaultBlockList.Remove(ctx, request.Id, request.Namespace)

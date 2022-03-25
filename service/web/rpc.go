@@ -68,6 +68,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		d.UseNumber()
 
 		if err := d.Decode(&rpcReq); err != nil {
+			err := errors.InternalServerError("go.micro.rpc", err.Error())
 			uhttp.WriteError(w, r, err)
 			return
 		}
@@ -86,6 +87,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			d.UseNumber()
 
 			if err := d.Decode(&request); err != nil {
+				err := errors.InternalServerError("go.micro.rpc", err.Error())
 				uhttp.WriteError(w, r, err)
 				return
 			}
@@ -103,18 +105,21 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		d.UseNumber()
 
 		if err := d.Decode(&request); err != nil {
+			err := errors.InternalServerError("go.micro.rpc", err.Error())
 			uhttp.WriteError(w, r, err)
 			return
 		}
 	}
 
 	if len(service) == 0 {
-		uhttp.WriteError(w, r, errors.InternalServerError("invalid service"))
+		err := errors.InternalServerError("go.micro.rpc", "invalid service")
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
 	if len(endpoint) == 0 {
-		uhttp.WriteError(w, r, errors.InternalServerError("invalid endpoint"))
+		err := errors.InternalServerError("go.micro.rpc", "invalid endpoint")
+		uhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -155,6 +160,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	rsp, err := response.MarshalJSON()
 	if err != nil {
+		err := errors.InternalServerError("go.micro.rpc", err.Error())
 		uhttp.WriteError(w, r, err)
 		return
 	}

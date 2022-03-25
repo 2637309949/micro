@@ -94,16 +94,16 @@ func (r *Rules) setupDefaultRules(ns string) {
 func (r *Rules) Create(ctx context.Context, req *pb.CreateRequest, rsp *pb.CreateResponse) error {
 	// Validate the request
 	if req.Rule == nil {
-		return errors.BadRequest("Rule missing")
+		return errors.BadRequest("auth.Rules.Create", "Rule missing")
 	}
 	if len(req.Rule.Id) == 0 {
-		return errors.BadRequest("ID missing")
+		return errors.BadRequest("auth.Rules.Create", "ID missing")
 	}
 	if req.Rule.Resource == nil {
-		return errors.BadRequest("Resource missing")
+		return errors.BadRequest("auth.Rules.Create", "Resource missing")
 	}
 	if req.Rule.Access == pb.Access_UNKNOWN {
-		return errors.BadRequest("Access missing")
+		return errors.BadRequest("auth.Rules.Create", "Access missing")
 	}
 
 	// set defaults
@@ -147,9 +147,9 @@ func (r *Rules) Delete(ctx context.Context, req *pb.DeleteRequest, rsp *pb.Delet
 	key := strings.Join([]string{storePrefixRules, req.Options.Namespace, req.Id}, joinKey)
 	err := r.Options.Store.Delete(key)
 	if err == store.ErrNotFound {
-		return errors.BadRequest("Rule not found")
+		return errors.BadRequest("auth.Rules.Delete", "Rule not found")
 	} else if err != nil {
-		return errors.InternalServerError("Unable to delete key from store: %v", err)
+		return errors.InternalServerError("auth.Rules.Delete", "Unable to delete key from store: %v", err)
 	}
 
 	// Clear the namespace cache, since the rules for this namespace could now be empty
@@ -182,7 +182,7 @@ func (r *Rules) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListRespo
 	prefix := strings.Join([]string{storePrefixRules, req.Options.Namespace, ""}, joinKey)
 	recs, err := r.Options.Store.Read(prefix, store.ReadPrefix())
 	if err != nil {
-		return errors.InternalServerError("Unable to read from store: %v", err)
+		return errors.InternalServerError("auth.Rules.List", "Unable to read from store: %v", err)
 	}
 
 	// unmarshal the records
@@ -190,7 +190,7 @@ func (r *Rules) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListRespo
 	for _, rec := range recs {
 		var r *pb.Rule
 		if err := json.Unmarshal(rec.Value, &r); err != nil {
-			return errors.InternalServerError("Error to unmarshaling json: %v. Value: %v", err, string(rec.Value))
+			return errors.InternalServerError("auth.Rules.List", "Error to unmarshaling json: %v. Value: %v", err, string(rec.Value))
 		}
 		rsp.Rules = append(rsp.Rules, r)
 	}
@@ -202,18 +202,18 @@ func (r *Rules) List(ctx context.Context, req *pb.ListRequest, rsp *pb.ListRespo
 func (r *Rules) writeRule(rule *pb.Rule, ns string) error {
 	key := strings.Join([]string{storePrefixRules, ns, rule.Id}, joinKey)
 	if _, err := r.Options.Store.Read(key); err == nil {
-		return errors.BadRequest("A rule with this ID already exists")
+		return errors.BadRequest("auth.Rules.Create", "A rule with this ID already exists")
 	}
 
 	// Encode the rule
 	bytes, err := json.Marshal(rule)
 	if err != nil {
-		return errors.InternalServerError("Unable to marshal rule: %v", err)
+		return errors.InternalServerError("auth.Rules.Create", "Unable to marshal rule: %v", err)
 	}
 
 	// Write to the store
 	if err := r.Options.Store.Write(&store.Record{Key: key, Value: bytes}); err != nil {
-		return errors.InternalServerError("Unable to write to the store: %v", err)
+		return errors.InternalServerError("auth.Rules.Create", "Unable to write to the store: %v", err)
 	}
 
 	return nil
