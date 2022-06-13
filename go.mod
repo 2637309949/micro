@@ -55,14 +55,12 @@ require (
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/urfave/cli/v2 v2.3.0
-	github.com/xanzy/go-gitlab v0.35.1
 	github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca
 	go.etcd.io/bbolt v1.3.6
 	go.etcd.io/etcd v0.5.0-alpha.5.0.20200425165423-262c93980547
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
 	golang.org/x/net v0.0.0-20211123203042-d83791d6bcd9
-	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
 	google.golang.org/genproto v0.0.0-20210602131652-f16073e35f0c
 	google.golang.org/grpc v1.38.0
 	google.golang.org/protobuf v1.26.0
