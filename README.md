@@ -1,6 +1,18 @@
-# Micro [![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white&style=flat-square)](https://pkg.go.dev/github.com/micro/micro/v3?tab=doc) [![License](https://img.shields.io/badge/license-apache-blue)](https://opensource.org/licenses/Apache-2.0) 
+# Micro
 
-Micro is an API first development platform.
+<p>
+    <a href="https://discord.gg/TBR9bRjd6Z"><img src="https://img.shields.io/badge/chat-discord-brightgreen.svg?logo=discord&%20style=flat"></a>
+    <a href="https://goreportcard.com/report/github.com/micro/micro">
+    <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/micro/micro">
+    </a>
+	<a href="https://pkg.go.dev/github.com/micro/micro/v3?tab=doc"><img
+    alt="Go.Dev reference"
+    src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white"></a>
+    <a href="https://opensource.org/licenses/Apache-2.0"><img
+    alt="Apache License"
+    src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"></a>
+</p>
+An API first development platform
 
 ## New feature
 
@@ -19,22 +31,12 @@ Micro is an API first development platform.
 - Use third-party api gateway authentication
 - Custom `Inspect` method in `service/auth/server/server.go:46` and use default rule
 
-## Overview
+## Overview 
 
 Micro addresses the key requirements for building services in the cloud. It leverages the microservices
-architecture pattern and provides a set of services which act as the building blocks of a platform. Micro deals
-with the complexity of distributed systems and provides simpler programmable abstractions to build on. 
+architecture pattern and provides a set of services which act as the building blocks of a platform. 
 
-## Contents
-
-- [Introduction](https://micro.dev/introduction) - A high level introduction to Micro
-- [Getting Started](https://micro.dev/getting-started) - The helloworld quickstart guide
-- [Upgrade Guide](https://micro.dev/upgrade-guide) - Update your go-micro project to use micro v3.
-- [Architecture](https://micro.dev/architecture) - Describes the architecture, design and tradeoffs
-- [Reference](https://micro.dev/reference) - In-depth reference for Micro CLI and services
-- [Resources](https://micro.dev/resources) - External resources and contributions
-- [Roadmap](https://micro.dev/roadmap) - Stuff on our agenda over the long haul
-- [FAQ](https://micro.dev/faq) - Frequently asked questions
+Micro deals with the complexity of distributed systems and provides simpler programmable abstractions to build on. 
 
 ## Features
 
@@ -79,21 +81,54 @@ Finally Micro bakes in the concept of `Environments` and multi-tenancy through `
 development and in the cloud for staging and production, seamlessly switch between them using the CLI commands `micro env set [environment]` 
 and `micro user set [namespace]`.
 
-## Getting Started
 
-Install micro
 
-```sh
+
+## Installation
+
+### From Source
+
+```
 go install github.com/micro/micro/v3@latest
 ```
 
-Run the server 
+### Install Binaries
+
+#### Windows
+Using Scoop
+```sh
+scoop bucket add micro-cli https://github.com/micro/micro.git
+```
+```sh
+scoop install micro-cli
+```
+Using powershell
+```sh
+powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+```
+#### Linux
+```sh
+wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+```
+#### MacOS
+```sh
+curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+```
+
+### Run the server 
 
 ```sh
 micro server
 ```
+Now go to [localhost:8080](http://localhost:8080) and make sure the output is something like `{"version": "v3.10.1"}` 
+which is the latest version of micro installed.
 
-Login with the username 'admin' and password 'micro':
+## Usage
+
+### Login to Micro
+default username: `admin`
+
+default password: `micro`
 
 ```sh
 $ micro login
@@ -121,13 +156,13 @@ store
 
 View in browser at localhost:8082
 
-Run a service
+### Run a service
 
 ```sh
 micro run github.com/micro/services/helloworld
 ```
 
-Now check the status of the running service
+### Check status of running service
 
 ```sh
 $ micro status
@@ -135,7 +170,7 @@ NAME		VERSION	SOURCE					STATUS	BUILD	UPDATED	METADATA
 helloworld	latest	github.com/micro/services/helloworld	running	n/a	4s ago	owner=admin, group=micro
 ```
 
-We can also have a look at logs of the service to verify it's running.
+### View logs of the service to verify it's running.
 
 ```sh
 $ micro logs helloworld
@@ -144,7 +179,7 @@ $ micro logs helloworld
 2020-10-06 17:52:21  file=grpc/grpc.go:732 level=info Registry [service] Registering node: helloworld-67627b23-3336-4b92-a032-09d8d13ecf95
 ```
 
-Call the service
+### Call the service
 
 ```sh
 $ micro helloworld call --name=Jane
@@ -159,7 +194,9 @@ Curl it
 curl "http://localhost:8080/helloworld?name=John"
 ```
 
-Write a client
+### Write a service client
+
+A service client is used within another service and must be run by micro
 
 ```go
 package main
@@ -203,11 +240,74 @@ Run it
 micro run .
 ```
 
+### Write an api client
+
+An api client is an external app or client which makes requests through the micro api
+
+Get a token
+```
+export TOKEN=`micro user token`
+```
+
+Call helloworld
+```go
+package main
+
+import (
+    "fmt"
+    "os"
+
+    "github.com/micro/micro/v3/client/api"
+)
+
+type Request struct {
+	Name string `json:"name"`
+}
+
+type Response struct {
+	Msg string `json:"msg"`
+}
+
+func main() {
+	token := os.Getenv("TOKEN")
+	c := api.NewClient(nil)
+
+	// set your api token
+	c.SetToken(token)
+
+   	req := &Request{
+		Name: "John",
+	}
+	
+	var rsp Response
+
+	if err := c.Call("helloworld", "Call", req, &rsp); err != nil {
+		fmt.Println(err)
+		return
+	}
+	
+	fmt.Println(rsp)
+}
+```
+
+Run it
+
+```
+go run main.go
+```
+
 For more see the [getting started](https://micro.dev/getting-started) guide.
 
-## Usage
+## Docs
 
-See the [docs](https://micro.dev/docs) for detailed information on the architecture, installation and use.
+- [Introduction](https://micro.dev/introduction) - A high level introduction to Micro
+- [Getting Started](https://micro.dev/getting-started) - The helloworld quickstart guide
+- [Upgrade Guide](https://micro.dev/upgrade-guide) - Update your go-micro project to use micro v3.
+- [Architecture](https://micro.dev/architecture) - Describes the architecture, design and tradeoffs
+- [Reference](https://micro.dev/reference) - In-depth reference for Micro CLI and services
+- [Resources](https://micro.dev/resources) - External resources and contributions
+- [Roadmap](https://micro.dev/roadmap) - Stuff on our agenda over the long haul
+- [FAQ](https://micro.dev/faq) - Frequently asked questions
 
 ## License
 
