@@ -89,7 +89,7 @@ and `micro user set [namespace]`.
 ### From Source
 
 ```
-go install github.com/micro/micro/v3@latest
+go install github.com/2637309949/micro/v3@latest
 ```
 
 ### Install Binaries
@@ -97,22 +97,22 @@ go install github.com/micro/micro/v3@latest
 #### Windows
 Using Scoop
 ```sh
-scoop bucket add micro-cli https://github.com/micro/micro.git
+scoop bucket add micro-cli https://github.com/2637309949/micro.git
 ```
 ```sh
 scoop install micro-cli
 ```
 Using powershell
 ```sh
-powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
 ```
 #### Linux
 ```sh
-wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 ```
 #### MacOS
 ```sh
-curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 ```
 
 ### Run the server 
