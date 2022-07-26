@@ -2,10 +2,10 @@
 
 <p>
     <a href="https://discord.gg/TBR9bRjd6Z"><img src="https://img.shields.io/badge/chat-discord-brightgreen.svg?logo=discord&%20style=flat"></a>
-    <a href="https://goreportcard.com/report/github.com/micro/micro">
-    <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/micro/micro">
+    <a href="https://goreportcard.com/report/github.com/2637309949/micro">
+    <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/2637309949/micro">
     </a>
-	<a href="https://pkg.go.dev/github.com/micro/micro/v3?tab=doc"><img
+	<a href="https://pkg.go.dev/github.com/2637309949/micro/v3?tab=doc"><img
     alt="Go.Dev reference"
     src="https://img.shields.io/badge/go.dev-reference-007d9c?logo=go&logoColor=white"></a>
     <a href="https://opensource.org/licenses/Apache-2.0"><img
@@ -222,8 +222,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/micro/micro/v3/service"
-	proto "github.com/micro/services/helloworld/proto"
+	"github.com/2637309949/micro/v3/service"
+	proto "github.com/2637309949/services/helloworld/proto"
 )
 
 func main() {
@@ -273,7 +273,7 @@ import (
     "fmt"
     "os"
 
-    "github.com/micro/micro/v3/client/api"
+    "github.com/2637309949/micro/v3/client/api"
 )
 
 type Request struct {

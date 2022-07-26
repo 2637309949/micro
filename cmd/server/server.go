@@ -54,7 +54,7 @@ func init() {
 				Name:    "image",
 				Usage:   "Set the micro server image",
 				EnvVars: []string{"MICRO_SERVER_IMAGE"},
-				Value:   "micro/micro:latest",
+				Value:   "2637309949/micro:latest",
 			},
 		},
 		Action: func(ctx *cli.Context) error {

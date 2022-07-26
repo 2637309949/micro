@@ -42,20 +42,20 @@ go get github.com/2637309949/micro/v3
 #### Docker
 
 ```sh
-docker pull micro/micro
+docker pull 2637309949/micro
 ```
 
 #### Release Binaries
 
 ```sh
 # MacOS
-curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 
 # Linux
-wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 
 # Windows
-powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
 ```
 
 ### Kubernetes
@@ -72,7 +72,7 @@ Install micro with the following commands:
 
 ```shell
 helm repo add micro https://micro.github.io/helm
-helm install micro micro/micro
+helm install micro 2637309949/micro
 ```
 
 #### Uninstall
@@ -238,7 +238,7 @@ FLAGS:
 
 ```
 
-At this point it is useful to have a look at the proto of the [registry service here](https://github.com/micro/micro/blob/master/proto/registry/registry.proto).
+At this point it is useful to have a look at the proto of the [registry service here](https://github.com/2637309949/micro/blob/master/proto/registry/registry.proto).
 
 In particular, let's see the `GetService` endpoint definition to understand how request parameters map to flags:
 
@@ -337,8 +337,8 @@ Micro is built as a distributed operating system leveraging the microservices ar
 
 Below we describe the list of services provided by the Micro Server. Each service is considered a 
 building block primitive for a platform and distributed systems development. The proto 
-interfaces for each can be found in [micro/proto/auth](https://github.com/micro/micro/blob/master/proto/auth/auth.proto) 
-and the Go library, client and server implementations in [micro/service/auth](https://github.com/micro/micro/tree/master/service/auth).
+interfaces for each can be found in [micro/proto/auth](https://github.com/2637309949/micro/blob/master/proto/auth/auth.proto) 
+and the Go library, client and server implementations in [micro/service/auth](https://github.com/2637309949/micro/tree/master/service/auth).
 
 ### API
 
@@ -727,7 +727,7 @@ func main() {
 The above service will print the value of `key.subkey` and `key.subkey` every second.
 By passing in the `config.Secret(true)` option, we tell config to decrypt secret values for us, similarly to the `--secret` CLI flag.
 
-The [config interface](https://github.com/micro/micro/blob/master/service/config/config.go) specifies not just `Get` `Set` and `Delete` to access values,
+The [config interface](https://github.com/2637309949/micro/blob/master/service/config/config.go) specifies not just `Get` `Set` and `Delete` to access values,
 but a few convenience functions too in the `Value` interface.
 
 It is worth noting that `String` `Int` etc methods will do a best effort try at coercing types, ie. if the value saved is a string, `Int` will try to parse it.
@@ -1290,7 +1290,7 @@ var staging = &profile.Profile{
 
 ```bash
 pushd profile/staging
-go mod init github.com/micro/micro/profile/staging
+go mod init github.com/2637309949/micro/profile/staging
 go mod tidy
 popd
 ```
@@ -1300,7 +1300,7 @@ popd
 You can load a custom profile using a couple of commands, the first adds a replace to your go mod, indicating it should look for your custom profile within the profile directory:
 
 ```bash
-go mod edit -replace github.com/micro/micro/profile/staging/v3=./profile/staging
+go mod edit -replace github.com/2637309949/micro/profile/staging/v3=./profile/staging
 go mod tidy
 ```
 

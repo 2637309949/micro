@@ -162,7 +162,7 @@ spec:
           value: "true"
         args:
         - api
-        image: micro/micro
+        image: 2637309949/micro
         imagePullPolicy: Always
         ports:
         - containerPort: 443
@@ -234,7 +234,7 @@ spec:
           value: "true"
         args:
         - web
-        image: micro/micro
+        image: 2637309949/micro
         imagePullPolicy: Always
         ports:
         - containerPort: 443

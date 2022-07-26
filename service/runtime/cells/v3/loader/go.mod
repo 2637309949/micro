@@ -1,4 +1,4 @@
-module github.com/micro/micro/service/runtime/cells/go/loader
+module github.com/2637309949/micro/service/runtime/cells/go/loader
 
 go 1.14
 

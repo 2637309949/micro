@@ -44,26 +44,26 @@ query them directly. The dashboard is also includes a built in CLI like experien
 ## Install Micro
 
 ```shell
-go get github.com/micro/micro/v2
+go get github.com/2637309949/micro/v2
 ```
 
 Or via Docker
 
 ```shell
-docker pull micro/micro
+docker pull 2637309949/micro
 ```
 
 Latest release binaries
 
 ```
 # MacOS
-curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 
 # Linux
-wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 
 # Windows
-powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
 ```
 
 ## Dependencies
@@ -124,10 +124,10 @@ brew install protobuf
 go get github.com/golang/protobuf/{proto,protoc-gen-go}
 
 # install protoc-gen-micro
-go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
+go get github.com/2637309949/micro/v2/cmd/protoc-gen-micro@master
 ```
 
-See [protoc-gen-micro](https://github.com/micro/micro/tree/master/cmd/protoc-gen-micro) for more details.
+See [protoc-gen-micro](https://github.com/2637309949/micro/tree/master/cmd/protoc-gen-micro) for more details.
 
 ## Writing a service
 

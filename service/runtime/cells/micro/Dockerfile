@@ -1,10 +1,10 @@
-FROM micro/micro
+FROM 2637309949/micro
 
 WORKDIR /
 
 # This is just a hack to download most of the dependencies micro and go micro has
 # We don't care it's not the latest version, just an approximation
-RUN mkdir go && cd go && git clone https://github.com/micro/micro && \
+RUN mkdir go && cd go && git clone https://github.com/2637309949/micro && \
     cd micro && go install
 
 COPY entrypoint.sh /

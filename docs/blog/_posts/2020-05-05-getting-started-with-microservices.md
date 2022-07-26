@@ -14,20 +14,20 @@ The Micro CLI consists of both the server command and other client commands that
 Using Go:
 
 ```sh
-go install github.com/micro/micro/v2
+go install github.com/2637309949/micro/v2
 ```
 
 Or by downloading the binary
 
 ```sh
 # MacOS
-curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 
 # Linux
-wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 
 # Windows
-powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
 ```
 
 ## Running a service
@@ -223,7 +223,7 @@ download protobuf for micro:
 brew install protobuf
 go get -u github.com/golang/protobuf/proto
 go get -u github.com/golang/protobuf/protoc-gen-go
-go get github.com/micro/micro/v2/cmd/protoc-gen-micro@master
+go get github.com/2637309949/micro/v2/cmd/protoc-gen-micro@master
 
 compile the proto file foobar.proto:
 

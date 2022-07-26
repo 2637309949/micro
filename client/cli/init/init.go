@@ -13,7 +13,7 @@ import (
 
 var (
 	// The import path we use for imports
-	Import = "github.com/micro/micro/profile"
+	Import = "github.com/2637309949/micro/profile"
 	// Vesion of micro
 	Version = "v3"
 )

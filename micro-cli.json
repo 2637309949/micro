@@ -2,7 +2,7 @@
     "version": "3.11.0",
     "architecture": {
         "64bit": {
-            "url": "https://github.com/micro/micro/releases/download/v3.11.0/micro-v3.11.0-windows-amd64.zip",
+            "url": "https://github.com/2637309949/micro/releases/download/v3.11.0/micro-v3.11.0-windows-amd64.zip",
             "bin": [
                 "micro.exe"
             ],

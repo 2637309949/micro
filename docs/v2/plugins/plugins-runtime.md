@@ -63,7 +63,7 @@ package main
 import (
 	"log"
 	"github.com/micro/cli"
-	"github.com/micro/micro/plugin"
+	"github.com/2637309949/micro/plugin"
 )
 
 func init() {

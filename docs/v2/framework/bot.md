@@ -98,7 +98,7 @@ func init() {
 Build binary
 
 ```shell
-cd github.com/micro/micro
+cd github.com/2637309949/micro
 
 // For local use
 go build -i -o micro ./main.go
@@ -151,7 +151,7 @@ func init() {
 Build binary
 
 ```shell
-cd github.com/micro/micro
+cd github.com/2637309949/micro
 
 // For local use
 go build -i -o micro ./main.go

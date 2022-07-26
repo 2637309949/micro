@@ -61,14 +61,14 @@ powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micr
 ### Docker Image
 
 ```
-docker pull micro/micro
+docker pull 2637309949/micro
 ```
 
 ### Helm Chart
 
 ```
 helm repo add micro https://micro.github.io/helm
-helm install micro micro/micro
+helm install micro 2637309949/micro
 ```
 
 ## Running a service

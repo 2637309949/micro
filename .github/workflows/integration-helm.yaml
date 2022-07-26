@@ -64,7 +64,7 @@ jobs:
       - name: Install the platform
         run: |
           helm repo add micro https://micro.github.io/helm
-          helm install micro micro/micro --set image.repo=localhost:5000/micro
+          helm install micro 2637309949/micro --set image.repo=localhost:5000/micro
           kubectl wait job --all --for=condition=complete -n micro --timeout=120s
           kubectl wait deployment --all --for=condition=available -n micro --timeout=120s
 

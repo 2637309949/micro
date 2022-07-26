@@ -14,20 +14,20 @@ Micro is incredibly simple to spin up locally
 From source
 
 ```
-go get github.com/micro/micro/v2
+go get github.com/2637309949/micro/v2
 ```
 
 Release binary
 
 ```
 # MacOS
-curl -fsSL https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh | /bin/bash
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 
 # Linux
-wget -q  https://raw.githubusercontent.com/micro/micro/master/scripts/install.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 
 # Windows
-powershell -Command "iwr -useb https://raw.githubusercontent.com/micro/micro/master/scripts/install.ps1 | iex"
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
 ```
 
 ## Run

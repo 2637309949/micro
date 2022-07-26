@@ -17,4 +17,4 @@ they relied on the docs so we preserve them for that reason
 
 ## Contents
 
-See [docs/v2](https://github.com/micro/micro/tree/master/docs/v2)
+See [docs/v2](https://github.com/2637309949/micro/tree/master/docs/v2)

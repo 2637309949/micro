@@ -56,7 +56,7 @@ package main
 import (
 	"log"
 	"github.com/urfave/cli/v2"
-	"github.com/micro/micro/plugin"
+	"github.com/2637309949/micro/plugin"
 )
 
 func init() {
