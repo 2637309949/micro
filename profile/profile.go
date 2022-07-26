@@ -365,7 +365,7 @@ func SetupBroker(b broker.Broker) {
 }
 
 // SetupJWT configures the default internal system rules
-func SetupJWT(ctx *cli.Context) {
+func SetupJWT(_ *cli.Context) {
 	for _, rule := range inAuth.SystemRules {
 		if err := microAuth.Grant(rule); err != nil {
 			logger.Fatal("Error creating default rule: %v", err)
