@@ -14,7 +14,7 @@ import (
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/util/ctx"
-	uhttp "github.com/2637309949/micro/v3/util/http"
+	xhttp "github.com/2637309949/micro/v3/util/http"
 )
 
 type rpcRequest struct {
@@ -69,7 +69,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if err := d.Decode(&rpcReq); err != nil {
 			err := errors.InternalServerError("go.micro.rpc", err.Error())
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
 
@@ -88,7 +88,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 			if err := d.Decode(&request); err != nil {
 				err := errors.InternalServerError("go.micro.rpc", err.Error())
-				uhttp.WriteError(w, r, err)
+				xhttp.WriteError(w, r, err)
 				return
 			}
 		}
@@ -106,20 +106,20 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		if err := d.Decode(&request); err != nil {
 			err := errors.InternalServerError("go.micro.rpc", err.Error())
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
 	}
 
 	if len(service) == 0 {
 		err := errors.InternalServerError("go.micro.rpc", "invalid service")
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 
 	if len(endpoint) == 0 {
 		err := errors.InternalServerError("go.micro.rpc", "invalid endpoint")
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -154,17 +154,17 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// remote call
 	err := h.client.Call(ctx, req, &response, opts...)
 	if err != nil {
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 
 	rsp, err := response.MarshalJSON()
 	if err != nil {
 		err := errors.InternalServerError("go.micro.rpc", err.Error())
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
-	rsp = uhttp.Marshal(ctx, rsp)
+	rsp = xhttp.Marshal(ctx, rsp)
 	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
 	w.Write(rsp)
 }

@@ -25,7 +25,7 @@ import (
 	"github.com/2637309949/micro/v3/service/api/handler"
 	"github.com/2637309949/micro/v3/service/client"
 	"github.com/2637309949/micro/v3/service/errors"
-	uhttp "github.com/2637309949/micro/v3/util/http"
+	xhttp "github.com/2637309949/micro/v3/util/http"
 	"github.com/2637309949/micro/v3/util/router"
 )
 
@@ -49,7 +49,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	request, err := requestToProto(r)
 	if err != nil {
 		err := errors.InternalServerError("go.micro.api", err.Error())
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -63,14 +63,14 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s, err := a.opts.Router.Route(r)
 		if err != nil {
 			err := errors.InternalServerError("go.micro.api", err.Error())
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
 		er := errors.InternalServerError("go.micro.api", "no route found")
-		uhttp.WriteError(w, r, er)
+		xhttp.WriteError(w, r, er)
 		return
 	}
 
@@ -80,7 +80,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	rsp := &api.Response{}
 
 	if err := c.Call(r.Context(), req, rsp, client.WithRouter(router.New(service.Services))); err != nil {
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	} else if rsp.StatusCode == 0 {
 		rsp.StatusCode = http.StatusOK
@@ -97,7 +97,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(int(rsp.StatusCode))
-	body := uhttp.Marshal(r.Context(), []byte(rsp.Body))
+	body := xhttp.Marshal(r.Context(), []byte(rsp.Body))
 	w.Write(body)
 }
 

@@ -217,8 +217,7 @@ func Run(ctx *cli.Context) error {
 	r := mux.NewRouter()
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r = r.WithContext(cx.FromRequest(r))
-			next.ServeHTTP(w, r)
+			next.ServeHTTP(w, r.WithContext(cx.FromRequest(r)))
 		})
 	})
 	h = r

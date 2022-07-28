@@ -15,7 +15,7 @@ import (
 	ahttp "github.com/2637309949/micro/v3/service/api/handler/http"
 	arpc "github.com/2637309949/micro/v3/service/api/handler/rpc"
 	aweb "github.com/2637309949/micro/v3/service/api/handler/web"
-	uhttp "github.com/2637309949/micro/v3/util/http"
+	xhttp "github.com/2637309949/micro/v3/util/http"
 )
 
 type metaHandler struct {
@@ -28,7 +28,7 @@ func (m *metaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	service, err := m.r.Route(r)
 	if err != nil {
 		err := errors.InternalServerError("go.micro.api", err.Error())
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 

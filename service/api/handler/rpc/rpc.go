@@ -29,7 +29,7 @@ import (
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/util/codec/bytes"
-	uhttp "github.com/2637309949/micro/v3/util/http"
+	xhttp "github.com/2637309949/micro/v3/util/http"
 	"github.com/2637309949/micro/v3/util/router"
 )
 
@@ -80,14 +80,14 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		s, err := h.opts.Router.Route(r)
 		if err != nil {
 			err = errors.InternalServerError("go.micro.api", err.Error())
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
 		service = s
 	} else {
 		// we have no way of routing the request
 		err := errors.InternalServerError("go.micro.api", "no route found")
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -116,7 +116,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	br, err := api.RequestPayload(r)
 	if err != nil {
 		err = errors.InternalServerError("go.micro.api", err.Error())
-		uhttp.WriteError(w, r, err)
+		xhttp.WriteError(w, r, err)
 		return
 	}
 
@@ -142,7 +142,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		// make the call
 		var response *bytes.Frame
 		if err := c.Call(r.Context(), req, response, callOpt); err != nil {
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
 		rsp = response.Data
@@ -170,7 +170,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		)
 		// make the call
 		if err := c.Call(r.Context(), req, &response, callOpt); err != nil {
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
 
@@ -178,10 +178,10 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		rsp, err = response.MarshalJSON()
 		if err != nil {
 			err = errors.InternalServerError("go.micro.api", err.Error())
-			uhttp.WriteError(w, r, err)
+			xhttp.WriteError(w, r, err)
 			return
 		}
-		rsp = uhttp.Marshal(r.Context(), rsp)
+		rsp = xhttp.Marshal(r.Context(), rsp)
 	}
 
 	// write the response
