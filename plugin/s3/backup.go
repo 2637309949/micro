@@ -53,7 +53,8 @@ func (i *backupImpl) Snapshot(st store.Store) error {
 	for _, obj := range out.Contents {
 		parts := strings.Split(*obj.Key, "/")
 		objName := parts[len(parts)-1]
-		if match, _ := regexp.MatchString("^[0-9]{10}", objName); !match {
+		re := regexp.MustCompile("^[0-9]{10}")
+		if match := re.MatchString(objName); !match {
 			continue
 		}
 		latest = objName
@@ -120,7 +121,7 @@ dateLoop:
 		for num := 1; num <= rollBackNum; num++ {
 			if _, err := i.client.DeleteObject(&sthree.DeleteObjectInput{
 				Bucket: aws.String(i.opts.Bucket),
-				Key:    aws.String(fmt.Sprintf("micro/eventsBackup/%s-%s", d, num)),
+				Key:    aws.String(fmt.Sprintf("micro/eventsBackup/%v-%v", d, num)),
 			}); err != nil {
 				logger.Errorf("Error during rollback %s", err)
 			}
