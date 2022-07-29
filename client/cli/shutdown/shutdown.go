@@ -4,7 +4,7 @@ package shutdown
 import (
 	"os/exec"
 
-	"github.com/micro/micro/v3/cmd"
+	"github.com/2637309949/micro/v3/cmd"
 	"github.com/urfave/cli/v2"
 )
 
@@ -18,7 +18,7 @@ func init() {
 	)
 }
 
-func shutdown(ctx *cli.Context) error {
+func shutdown(_ *cli.Context) error {
 	// send the shutdown signal
 	// TODO: send Server.Shutdown
 	_, err := exec.Command("killall", "micro").CombinedOutput()
