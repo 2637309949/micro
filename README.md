@@ -86,7 +86,7 @@ and `micro user set [namespace]`.
 
 ## Installation
 
-### From Source (depleted)
+### From Source (Depleted)
 
 ```
 go install github.com/2637309949/micro/v3@latest
