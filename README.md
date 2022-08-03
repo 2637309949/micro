@@ -89,12 +89,7 @@ and `micro user set [namespace]`.
 ### From Source
 
 ```
-git clone git@github.com:2637309949/micro.git --depth=1
-cd micro && go install && cd ..
-cd micro/cmd/protoc-gen-micro && go install && cd ../../../
-cd micro/cmd/protoc-gen-openapi && go install && cd ../../../
-cd micro/cmd/protoc-gen-client && go install && cd ../../../
-rm micro -rf
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install2.sh -O - | /bin/bash
 ```
 
 ### Run the server 
