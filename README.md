@@ -89,7 +89,7 @@ and `micro user set [namespace]`.
 ### From Source
 
 ```
-wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install2.sh -O - | /bin/bash
+wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
 ```
 
 ### Run the server 
