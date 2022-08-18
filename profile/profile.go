@@ -21,7 +21,10 @@ import (
 	microBuilder "github.com/2637309949/micro/v3/service/build"
 	"github.com/2637309949/micro/v3/service/build/golang"
 	"github.com/2637309949/micro/v3/service/client"
-	"github.com/2637309949/micro/v3/service/events"
+	grpcClient "github.com/2637309949/micro/v3/service/client/grpc"
+	"github.com/2637309949/micro/v3/service/config"
+	storeConfig "github.com/2637309949/micro/v3/service/config/store"
+	microEvents "github.com/2637309949/micro/v3/service/events"
 	evStore "github.com/2637309949/micro/v3/service/events/store"
 	memStream "github.com/2637309949/micro/v3/service/events/stream/memory"
 	"github.com/2637309949/micro/v3/service/logger"
@@ -36,7 +39,9 @@ import (
 	"github.com/2637309949/micro/v3/service/runtime/kubernetes"
 	"github.com/2637309949/micro/v3/service/runtime/local"
 	"github.com/2637309949/micro/v3/service/server"
+	grpcServer "github.com/2637309949/micro/v3/service/server/grpc"
 	"github.com/2637309949/micro/v3/service/store"
+	microStore "github.com/2637309949/micro/v3/service/store"
 	"github.com/2637309949/micro/v3/service/store/file"
 	mem "github.com/2637309949/micro/v3/service/store/memory"
 	inAuth "github.com/2637309949/micro/v3/util/auth"
@@ -53,6 +58,7 @@ var profiles = map[string]*Profile{
 	// built in profiles
 	"client":     Client,
 	"service":    Service,
+	"server":     Server,
 	"test":       Test,
 	"local":      Local,
 	"staging":    Staging,
@@ -93,10 +99,14 @@ var Client = &Profile{
 	Setup: func(ctx *cli.Context) error { return nil },
 }
 
-// Local profile to run locally
+// Local profile to run as a single process
 var Local = &Profile{
 	Name: "local",
 	Setup: func(ctx *cli.Context) error {
+		// set client/server
+		client.DefaultClient = grpcClient.NewClient()
+		server.DefaultServer = grpcServer.NewServer()
+
 		microAuth.DefaultAuth = jwt.NewAuth()
 		store.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
 		SetupConfigSecretKey(ctx)
@@ -113,33 +123,25 @@ var Local = &Profile{
 			)
 			SetupRegistry(registry.DefaultRegistry)
 		}
+		config.DefaultConfig, _ = storeConfig.NewConfig(microStore.DefaultStore, "")
 
-		// the broker service uses the memory broker, the other core services will use the default
-		// rpc client and call the broker service
-		if ctx.Args().Get(1) == "broker" {
-			SetupBroker(memBroker.NewBroker())
-		} else {
-			broker.DefaultBroker.Init(
-				broker.Addrs("localhost:8003"),
-			)
-			SetupBroker(broker.DefaultBroker)
-		}
+		SetupJWT(ctx)
+		SetupRegistry(memory.NewRegistry())
+		SetupBroker(memBroker.NewBroker())
 
 		// set the store in the model
 		model.DefaultModel = model.NewModel(
 			model.WithStore(store.DefaultStore),
 		)
 
-		// use the local runtime, note: the local runtime is designed to run source code directly so
-		// the runtime builder should NOT be set when using this implementation
 		microRuntime.DefaultRuntime = local.NewRuntime()
 
 		var err error
-		events.DefaultStream, err = memStream.NewStream()
+		microEvents.DefaultStream, err = memStream.NewStream()
 		if err != nil {
 			logger.Fatalf("Error configuring stream: %v", err)
 		}
-		events.DefaultStore = evStore.NewStore(
+		microEvents.DefaultStore = evStore.NewStore(
 			evStore.WithStore(store.DefaultStore),
 		)
 
@@ -147,20 +149,6 @@ var Local = &Profile{
 		if err != nil {
 			logger.Fatalf("Error configuring file blob store: %v", err)
 		}
-
-		// Configure tracing with Jaeger (forced tracing):
-		tracingServiceName := ctx.Args().Get(1)
-		if len(tracingServiceName) == 0 {
-			tracingServiceName = "Micro"
-		}
-		openTracer, _, err := jaeger.New(
-			opentelemetry.WithServiceName(tracingServiceName),
-			opentelemetry.WithSamplingRate(1),
-		)
-		if err != nil {
-			logger.Fatalf("Error configuring opentracing: %v", err)
-		}
-		opentelemetry.DefaultOpenTracer = openTracer
 
 		return nil
 	},
@@ -192,11 +180,11 @@ var Staging = &Profile{
 
 		var err error
 		if ctx.Args().Get(1) == "events" {
-			events.DefaultStream, err = redisstream.NewStream(redisStreamOpts(ctx)...)
+			microEvents.DefaultStream, err = redisstream.NewStream(redisStreamOpts(ctx)...)
 			if err != nil {
 				logger.Fatalf("Error configuring stream: %v", err)
 			}
-			events.DefaultStore = evStore.NewStore(
+			microEvents.DefaultStore = evStore.NewStore(
 				evStore.WithStore(store.DefaultStore),
 			)
 		}
@@ -275,7 +263,7 @@ var Kubernetes = &Profile{
 			logger.Fatalf("Error configuring golang builder: %v", err)
 		}
 
-		events.DefaultStream, err = memStream.NewStream()
+		microEvents.DefaultStream, err = memStream.NewStream()
 		if err != nil {
 			logger.Fatalf("Error configuring stream: %v", err)
 		}
@@ -317,6 +305,80 @@ var Kubernetes = &Profile{
 		openTracer, _, err := jaeger.New(
 			opentelemetry.WithServiceName(tracingServiceName),
 			opentelemetry.WithTraceReporterAddress("localhost:6831"),
+		)
+		if err != nil {
+			logger.Fatalf("Error configuring opentracing: %v", err)
+		}
+		opentelemetry.DefaultOpenTracer = openTracer
+
+		return nil
+	},
+}
+
+var Server = &Profile{
+	Name: "server",
+	Setup: func(ctx *cli.Context) error {
+		microAuth.DefaultAuth = jwt.NewAuth()
+		microStore.DefaultStore = file.NewStore(file.WithDir(filepath.Join(user.Dir, "server", "store")))
+		SetupConfigSecretKey(ctx)
+		config.DefaultConfig, _ = storeConfig.NewConfig(microStore.DefaultStore, "")
+		SetupJWT(ctx)
+
+		// the registry service uses the memory registry, the other core services will use the default
+		// rpc client and call the registry service
+		if ctx.Args().Get(1) == "registry" {
+			SetupRegistry(memory.NewRegistry())
+		} else {
+			// set the registry address
+			registry.DefaultRegistry.Init(
+				registry.Addrs("localhost:8000"),
+			)
+
+			SetupRegistry(registry.DefaultRegistry)
+		}
+
+		// the broker service uses the memory broker, the other core services will use the default
+		// rpc client and call the broker service
+		if ctx.Args().Get(1) == "broker" {
+			SetupBroker(memBroker.NewBroker())
+		} else {
+			broker.DefaultBroker.Init(
+				broker.Addrs("localhost:8003"),
+			)
+			SetupBroker(broker.DefaultBroker)
+		}
+
+		// set the store in the model
+		model.DefaultModel = model.NewModel(
+			model.WithStore(microStore.DefaultStore),
+		)
+
+		// use the local runtime, note: the local runtime is designed to run source code directly so
+		// the runtime builder should NOT be set when using this implementation
+		microRuntime.DefaultRuntime = local.NewRuntime()
+
+		var err error
+		microEvents.DefaultStream, err = memStream.NewStream()
+		if err != nil {
+			logger.Fatalf("Error configuring stream: %v", err)
+		}
+		microEvents.DefaultStore = evStore.NewStore(
+			evStore.WithStore(microStore.DefaultStore),
+		)
+
+		microStore.DefaultBlobStore, err = file.NewBlobStore()
+		if err != nil {
+			logger.Fatalf("Error configuring file blob store: %v", err)
+		}
+
+		// Configure tracing with Jaeger (forced tracing):
+		tracingServiceName := ctx.Args().Get(1)
+		if len(tracingServiceName) == 0 {
+			tracingServiceName = "Micro"
+		}
+		openTracer, _, err := jaeger.New(
+			opentelemetry.WithServiceName(tracingServiceName),
+			opentelemetry.WithSamplingRate(1),
 		)
 		if err != nil {
 			logger.Fatalf("Error configuring opentracing: %v", err)

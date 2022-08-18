@@ -172,6 +172,7 @@ func (a authWrapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// if the login url matches the request then we do nothing
 	// its the login page so we want to allow serving it
 	if uri == loginURL {
+		a.handler.ServeHTTP(w, req)
 		return
 	}
 

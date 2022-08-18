@@ -1,7 +1,6 @@
 # Micro
 
 <p>
-    <a href="https://discord.gg/TBR9bRjd6Z"><img src="https://img.shields.io/badge/chat-discord-brightgreen.svg?logo=discord&%20style=flat"></a>
     <a href="https://goreportcard.com/report/github.com/2637309949/micro">
     <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/2637309949/micro">
     </a>
@@ -60,7 +59,6 @@ The server is composed of the following services.
 - **Runtime** - Service lifecycle and process management with support for source to running auto build
 - **Registry** - Centralised service discovery and API endpoint explorer with feature rich metadata
 - **Store** - Key-Value storage with TTL expiry and persistent crud to keep microservices stateless
-- **Web** - Simple web dashboard with dynamic forms to describe and query services in the browser
 
 **Framework**
 
@@ -81,8 +79,10 @@ Finally Micro bakes in the concept of `Environments` and multi-tenancy through `
 development and in the cloud for staging and production, seamlessly switch between them using the CLI commands `micro env set [environment]` 
 and `micro user set [namespace]`.
 
+**Web Dashboard**
 
-
+Explore, discover and consume services via the web using Micro Web. The dashboard makes use of your env configuration to locate the server 
+and provides dynamic form fill for services.
 
 ## Installation
 
@@ -130,8 +130,6 @@ runtime
 server
 store
 ```
-
-View in browser at localhost:8082
 
 ### Create a Service
 
@@ -290,6 +288,16 @@ go run main.go
 ```
 
 For more see the [getting started](https://micro.dev/getting-started) guide.
+
+## Web Dashboard
+
+Use services via the web with the Micro Web dashboard
+
+```
+micro web
+```
+
+Browse to `localhost:8082`
 
 ## Docs
 

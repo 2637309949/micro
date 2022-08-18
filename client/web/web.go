@@ -7,18 +7,21 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"os/signal"
 	"sort"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
-	"github.com/2637309949/micro/v3/service"
+	"github.com/2637309949/micro/v3/cmd"
 	server "github.com/2637309949/micro/v3/service/api"
 	apiAuth "github.com/2637309949/micro/v3/service/api/auth"
 	res "github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/resolver/subdomain"
 	httpapi "github.com/2637309949/micro/v3/service/api/server/http"
 	"github.com/2637309949/micro/v3/service/auth"
+	"github.com/2637309949/micro/v3/service/client"
 	log "github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/service/registry"
 	muregistry "github.com/2637309949/micro/v3/service/registry"
@@ -71,6 +74,16 @@ type reg struct {
 	services []*registry.Service
 }
 
+func init() {
+	cmd.Register(
+		&cli.Command{
+			Name:   "web",
+			Usage:  "Run the micro web UI",
+			Action: Run,
+		},
+	)
+}
+
 // ServeHTTP serves the web dashboard and proxies where appropriate
 func (s *srv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// check if authenticated
@@ -97,13 +110,7 @@ func (s *srv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.URL.Scheme = "http"
 	}
 
-	// no endpoint was set in the context, so we'll look it up. If the router returns an error we will
-	// send the request to the mux which will render the web dashboard.
 	s.Router.ServeHTTP(w, r)
-	//_, err := s.resolver.Resolve(r)
-	//if err != nil {
-	//	return
-	//}
 }
 
 func split(v string) string {
@@ -548,9 +555,6 @@ func Run(ctx *cli.Context) error {
 		Namespace = ctx.String("namespace")
 	}
 
-	// Initialize Server
-	s := service.New(service.Name(Name))
-
 	// Setup the web resolver
 	var resolver res.Resolver
 
@@ -594,7 +598,7 @@ func Run(ctx *cli.Context) error {
 	srv.HandleFunc("/client", srv.callHandler)
 	srv.HandleFunc("/services", srv.registryHandler)
 	srv.HandleFunc("/service/{name}", srv.registryHandler)
-	srv.Handle("/rpc", NewRPCHandler(resolver, s.Client()))
+	srv.Handle("/rpc", NewRPCHandler(resolver, client.DefaultClient))
 	srv.HandleFunc("/{service}", srv.serviceHandler)
 	srv.HandleFunc("/", srv.indexHandler)
 
@@ -676,10 +680,9 @@ func Run(ctx *cli.Context) error {
 		log.Fatal(err)
 	}
 
-	// Run service
-	if err := s.Run(); err != nil {
-		log.Fatal(err)
-	}
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGKILL)
+	<-ch
 
 	if err := server.Stop(); err != nil {
 		log.Fatal(err)

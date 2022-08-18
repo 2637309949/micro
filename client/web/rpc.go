@@ -77,6 +77,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		endpoint = rpcReq.Endpoint
 		address = rpcReq.Address
 		request = rpcReq.Request
+
 		if len(endpoint) == 0 {
 			endpoint = rpcReq.Method
 		}
@@ -139,6 +140,9 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(address) > 0 {
 		opts = append(opts, client.WithAddress(address))
 	}
+
+	// set the use of an auth token
+	opts = append(opts, client.WithAuthToken())
 
 	// since services can be running in many domains, we'll use the resolver to determine the domain
 	// which should be used on the call
