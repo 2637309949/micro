@@ -21,7 +21,7 @@ func (r *redisStream) runJanitor() {
 	go func() {
 		for {
 			if err := r.cleanupConsumers(); err != nil {
-				logger.Errorf("Error cleaning up consumers")
+				logger.Errorf("Error cleaning up consumers %v", err)
 			}
 			time.Sleep(janitorFrequency)
 		}

@@ -173,7 +173,7 @@ func redisStreamOpts(ctx *cli.Context) []redisstream.Option {
 // ClientProfile is for clients running on the micro platform
 var ClientProfile = &profile.Profile{
 	Name: "platform_client",
-	Setup: func(ctx *cli.Context) error {
+	Setup: func(_ *cli.Context) error {
 		var retErr error
 		clientOnce.Do(func() {
 			// Set up a default metrics reporter (being careful not to clash with any that have already been set):
