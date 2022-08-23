@@ -62,8 +62,8 @@ The server is composed of the following services.
 
 **Framework**
 
-Micro additionally contains a built in Go framework for service development. 
-The Go framework makes it drop dead simple to write your services without having to piece together lines and lines of boilerplate. Auto 
+Micro comes with a built in Go framework for service development. 
+The Go framework makes it drop dead simple to write your services without having to piece together endless lines of boilerplate code. Auto 
 configured and initialised by default, just import and get started quickly.
 
 **Command Line**
@@ -75,7 +75,7 @@ services, status info and log streaming, plus much, much more.
 
 **Environments**
 
-Finally Micro bakes in the concept of `Environments` and multi-tenancy through `Namespaces`. Run your server locally for 
+Micro bakes in the concept of `Environments` and multi-tenancy through `Namespaces`. Run your server locally for 
 development and in the cloud for staging and production, seamlessly switch between them using the CLI commands `micro env set [environment]` 
 and `micro user set [namespace]`.
 
@@ -198,30 +198,42 @@ import (
 	"time"
 
 	"github.com/2637309949/micro/v3/service"
-	proto "github.com/2637309949/services/helloworld/proto"
+	"github.com/2637309949/micro/v3/service/client"
+	proto "github.com/micro/services/helloworld/proto"
 )
+
+func callService(c client.Client) {
+	// create the proto client for helloworld
+	hw := proto.NewHelloworldService("helloworld", c)
+
+	for {
+		// call an endpoint on the service
+		rsp, err := hw.Call(context.Background(), &proto.CallRequest{
+			Name: "John",
+		})
+		if err != nil {
+			fmt.Println("Error calling helloworld: ", err)
+			return
+		}
+
+		// print the response
+		fmt.Println("Response: ", rsp.Message)
+
+		time.Sleep(time.Second)
+	}
+}
 
 func main() {
 	// create and initialise a new service
-	srv := service.New()
+	srv := service.New(
+		service.Name("caller"),
+	)
 
-	// create the proto client for helloworld
-	client := proto.NewHelloworldService("helloworld", srv.Client())
-
-	// call an endpoint on the service
-	rsp, err := client.Call(context.Background(), &proto.CallRequest{
-		Name: "John",
-	})
-	if err != nil {
-		fmt.Println("Error calling helloworld: ", err)
-		return
-	}
-
-	// print the response
-	fmt.Println("Response: ", rsp.Message)
+	// run the client caller
+	go callService(srv.Client())
 	
-	// let's delay the process for exiting for reasons you'll see below
-	time.Sleep(time.Second * 5)
+	// run the service
+	service.Run()
 }
 ```
 
