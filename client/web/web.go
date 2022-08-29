@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/2637309949/micro/v3/cmd"
-	server "github.com/2637309949/micro/v3/service/api"
 	apiAuth "github.com/2637309949/micro/v3/service/api/auth"
 	res "github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/resolver/subdomain"
@@ -27,15 +26,8 @@ import (
 	muregistry "github.com/2637309949/micro/v3/service/registry"
 	"github.com/2637309949/micro/v3/service/router"
 	regRouter "github.com/2637309949/micro/v3/service/router/registry"
-	"github.com/2637309949/micro/v3/service/store"
-	"github.com/2637309949/micro/v3/util/acme"
-	"github.com/2637309949/micro/v3/util/acme/autocert"
-	"github.com/2637309949/micro/v3/util/acme/certmagic"
 	cx "github.com/2637309949/micro/v3/util/ctx"
-	"github.com/2637309949/micro/v3/util/helper"
-	"github.com/2637309949/micro/v3/util/sync/memory"
 	"github.com/fatih/camelcase"
-	"github.com/go-acme/lego/v3/providers/dns/cloudflare"
 	"github.com/gorilla/mux"
 	"github.com/serenize/snaker"
 	"github.com/urfave/cli/v2"
@@ -43,14 +35,11 @@ import (
 
 //Meta Fields of micro web
 var (
-	Name                  = "web"
-	Address               = ":8082"
-	Namespace             = "micro"
-	Resolver              = "path"
-	LoginURL              = "/login"
-	ACMEProvider          = "autocert"
-	ACMEChallengeProvider = "cloudflare"
-	ACMECA                = acme.LetsEncryptProductionCA
+	Name      = "web"
+	Address   = ":8082"
+	Namespace = "micro"
+	Resolver  = "path"
+	LoginURL  = "/login"
 
 	// Host name the web dashboard is served on
 	Host, _ = os.Hostname()
@@ -602,70 +591,9 @@ func Run(ctx *cli.Context) error {
 	srv.HandleFunc("/{service}", srv.serviceHandler)
 	srv.HandleFunc("/", srv.indexHandler)
 
-	var opts []server.Option
-
-	if len(ctx.String("acme_provider")) > 0 {
-		ACMEProvider = ctx.String("acme_provider")
-	}
-	if ctx.Bool("enable_acme") {
-		hosts := helper.ACMEHosts(ctx)
-		opts = append(opts, server.EnableACME(true))
-		opts = append(opts, server.ACMEHosts(hosts...))
-		switch ACMEProvider {
-		case "autocert":
-			opts = append(opts, server.ACMEProvider(autocert.NewProvider()))
-		case "certmagic":
-			// TODO: support multiple providers in internal/acme as a map
-			if ACMEChallengeProvider != "cloudflare" {
-				log.Fatal("The only implemented DNS challenge provider is cloudflare")
-			}
-
-			apiToken := os.Getenv("CF_API_TOKEN")
-			if len(apiToken) == 0 {
-				log.Fatal("env variables CF_API_TOKEN and CF_ACCOUNT_ID must be set")
-			}
-
-			// create the store
-			storage := certmagic.NewStorage(memory.NewSync(), store.DefaultStore)
-
-			config := cloudflare.NewDefaultConfig()
-			config.AuthToken = apiToken
-			config.ZoneToken = apiToken
-			challengeProvider, err := cloudflare.NewDNSProviderConfig(config)
-			if err != nil {
-				log.Fatal(err.Error())
-			}
-
-			opts = append(opts,
-				server.ACMEProvider(
-					certmagic.NewProvider(
-						acme.AcceptToS(true),
-						acme.CA(ACMECA),
-						acme.Cache(storage),
-						acme.ChallengeProvider(challengeProvider),
-						acme.OnDemand(false),
-					),
-				),
-			)
-		default:
-			log.Fatalf("%s is not a valid ACME provider\n", ACMEProvider)
-		}
-	} else if ctx.Bool("enable_tls") {
-		config, err := helper.TLSConfig(ctx)
-		if err != nil {
-			fmt.Println(err.Error())
-			return err
-		}
-
-		opts = append(opts, server.EnableTLS(true))
-		opts = append(opts, server.TLSConfig(config))
-	}
-
 	// create the service and add the auth wrapper
 	aw := apiAuth.Wrapper(srv.resolver, Namespace)
 	server := httpapi.NewServer(Address)
-
-	server.Init(opts...)
 	server.Handle("/", aw(h))
 
 	// Setup auth redirect
