@@ -26,7 +26,7 @@ require (
 	github.com/getkin/kin-openapi v0.26.0
 	github.com/go-acme/lego/v3 v3.4.0
 	github.com/go-redis/redis/v8 v8.10.1-0.20210615084835-43ec1464d9a6
-	github.com/gofrs/uuid v3.2.0+incompatible
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang-jwt/jwt v0.0.0-20210529014511-0f726ea0e725
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2
@@ -42,6 +42,7 @@ require (
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hpcloud/tail v1.0.0
 	github.com/improbable-eng/grpc-web v0.13.0
+	github.com/jackc/pgx/v4 v4.17.1
 	github.com/jonboulle/clockwork v0.2.0 // indirect
 	github.com/klauspost/compress v1.15.4 // indirect
 	github.com/kr/pretty v0.3.0
@@ -69,8 +70,8 @@ require (
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/stoewer/go-strcase v1.2.0
-	github.com/stretchr/objx v0.3.0
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/objx v0.4.0
+	github.com/stretchr/testify v1.8.0
 	github.com/teris-io/shortid v0.0.0-20171029131806-771a37caa5cf
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20200427203606-3cfed13b9966 // indirect
 	github.com/uber/jaeger-client-go v2.29.1+incompatible
@@ -81,7 +82,7 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	go.etcd.io/etcd v0.5.0-alpha.5.0.20200425165423-262c93980547
 	go.uber.org/zap v1.17.0
-	golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
+	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20220610221304-9f5ed59c137d // indirect

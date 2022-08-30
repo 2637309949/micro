@@ -26,8 +26,8 @@ import (
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
 
-	"github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/store"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/store"
 )
 
 const defaultDatabase = "micro"
