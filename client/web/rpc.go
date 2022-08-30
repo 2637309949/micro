@@ -78,7 +78,8 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		request = rpcReq.Request
 
 		if len(endpoint) == 0 {
-			badRequest("missing endpoint in request")
+			err := errors.BadRequest("go.micro.rpc", "missing endpoint in request")
+			xhttp.WriteError(w, r, err)
 			return
 		}
 
