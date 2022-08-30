@@ -23,7 +23,6 @@ import (
 	"github.com/2637309949/micro/v3/service/client"
 	log "github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/service/registry"
-	muregistry "github.com/2637309949/micro/v3/service/registry"
 	"github.com/2637309949/micro/v3/service/router"
 	regRouter "github.com/2637309949/micro/v3/service/router/registry"
 	cx "github.com/2637309949/micro/v3/util/ctx"
@@ -550,7 +549,7 @@ func Run(ctx *cli.Context) error {
 	// the default resolver
 	resolver = &WebResolver{
 		Router: regRouter.NewRouter(
-			router.Registry(muregistry.DefaultRegistry),
+			router.Registry(registry.DefaultRegistry),
 		),
 		Options: res.NewOptions(res.WithServicePrefix(
 			Namespace,
@@ -565,7 +564,7 @@ func Run(ctx *cli.Context) error {
 	srv := &srv{
 		Router: mux.NewRouter(),
 		registry: &reg{
-			Registry: muregistry.DefaultRegistry,
+			Registry: registry.DefaultRegistry,
 		},
 		resolver: resolver,
 	}
@@ -651,7 +650,7 @@ func reverse(s []string) {
 }
 
 type sortedServices struct {
-	services []*muregistry.Service
+	services []*registry.Service
 }
 
 func (s sortedServices) Len() int {
