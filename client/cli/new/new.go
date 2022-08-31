@@ -196,6 +196,7 @@ func Run(ctx *cli.Context) error {
 			{"handler/" + dir + "_handler.go", tmpl.HandlerAPISRV},
 			{"../proto/" + dir + "/" + dir + ".proto", tmpl.ProtoModelSRV},
 			{"../proto/" + dir + "/handler.proto", tmpl.ProtoServiceSRV},
+			{"../proto/" + dir + "/enum.proto", tmpl.EnumSRV},
 			{"Dockerfile", tmpl.DockerSRV},
 			{"Makefile", tmpl.Makefile},
 			{"README.md", tmpl.Readme},

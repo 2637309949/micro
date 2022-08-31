@@ -51,10 +51,10 @@ message UpdateInfoResponse {
 message QueryInfoRequest {
 	uint32 id = 1 [json_name = "id"];
 	string name = 2 [json_name = "name"];
-
 	int32 page = 3 [json_name = "page"];
 	int32 size = 4 [json_name = "size"];
-	int32 order = 5 [json_name = "order"];
+	int32 order_type = 5 [json_name = "order_type"];
+	string order_col = 6 [json_name = "order_col"];
 }
 
 message QueryInfoResponseItem {
@@ -77,6 +77,17 @@ message QueryInfoDetailRequest {
 message QueryInfoDetailResponse {
 	uint32 id = 1 [json_name = "id"];
 	string name = 2 [json_name = "name"];
+}
+`
+
+	EnumSRV = `syntax = "proto3";
+
+package {{dehyphen .Alias}};
+
+option go_package = "./proto;{{dehyphen .Alias}}";
+
+enum InfoType {
+	None = 0;
 }
 `
 )
