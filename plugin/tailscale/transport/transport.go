@@ -9,11 +9,11 @@ import (
 	"net"
 	"time"
 
-	log "github.com/micro/micro/v3/service/logger"
-	"github.com/micro/micro/v3/service/network/transport"
-	maddr "github.com/micro/micro/v3/util/addr"
-	mnet "github.com/micro/micro/v3/util/net"
-	mls "github.com/micro/micro/v3/util/tls"
+	log "github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/network/transport"
+	maddr "github.com/2637309949/micro/v3/util/addr"
+	mnet "github.com/2637309949/micro/v3/util/net"
+	mls "github.com/2637309949/micro/v3/util/tls"
 	"tailscale.com/tsnet"
 )
 

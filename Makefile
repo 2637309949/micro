@@ -48,4 +48,8 @@ up:
 	@sh ./scripts/kill.sh
 	@go run main.go server
 
+release:
+	cp micro /usr/bin
+	/usr/bin/micro server
+
 .PHONY: build clean vet test docker
