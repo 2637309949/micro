@@ -37,7 +37,7 @@ build:
 
 .PHONY: up
 up:
-	@go run . server --name=$(NAME)
+	@go run . --service_name=$(NAME) --service_version=
 
 .PHONY: test
 test:
