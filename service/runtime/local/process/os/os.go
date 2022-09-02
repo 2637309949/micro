@@ -67,7 +67,13 @@ func (p *Process) Fork(exe *process.Binary) (*process.PID, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	// start the process
+	// tag by double
+	// read code `createServiceInRuntime`, through proxy
+	// MICRO_PROXY=xxx,MICRO_AUTH_ID=xxx-latest,MICRO_AUTH_SECRET=xxx
+	// cmd /root/.gvm/gos/go1.18.1/bin/go [go run -mod vendor .]
+	// dir /tmp/blob-365110842
 	if err := cmd.Start(); err != nil {
 		return nil, err
 	}
