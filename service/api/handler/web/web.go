@@ -90,9 +90,9 @@ func (wh *webHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (wh *webHandler) getService(r *http.Request) (string, error) {
 	var service *api.Service
 
-	if wh.s != nil {
+	if v, ok := r.Context().(handler.Context); ok {
 		// we were given the service
-		service = wh.s
+		service = v.Service()
 	} else if wh.opts.Router != nil {
 		// try get service from router
 		s, err := wh.opts.Router.Route(r)
@@ -202,14 +202,5 @@ func (wh *webHandler) String() string {
 func NewHandler(opts ...handler.Option) handler.Handler {
 	return &webHandler{
 		opts: handler.NewOptions(opts...),
-	}
-}
-
-func WithService(s *api.Service, opts ...handler.Option) handler.Handler {
-	options := handler.NewOptions(opts...)
-
-	return &webHandler{
-		opts: options,
-		s:    s,
 	}
 }

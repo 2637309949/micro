@@ -22,13 +22,13 @@ import (
 	"testing"
 
 	"github.com/2637309949/micro/v3/service/client"
+	pb "github.com/2637309949/micro/v3/service/client/grpc/proto"
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/service/registry"
 	"github.com/2637309949/micro/v3/service/registry/memory"
 	"github.com/2637309949/micro/v3/service/router"
 	regRouter "github.com/2637309949/micro/v3/service/router/registry"
 	pgrpc "google.golang.org/grpc"
-	pb "google.golang.org/grpc/examples/helloworld/helloworld"
 )
 
 // server is used to implement helloworld.GreeterServer.

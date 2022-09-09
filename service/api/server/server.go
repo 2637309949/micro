@@ -1,5 +1,4 @@
-// Package api is an API Gateway
-package api
+package server
 
 import (
 	"fmt"
@@ -9,13 +8,13 @@ import (
 	"github.com/2637309949/micro/v3/plugin"
 	pb "github.com/2637309949/micro/v3/proto/api"
 	"github.com/2637309949/micro/v3/service"
-	apiserver "github.com/2637309949/micro/v3/service/api"
+	"github.com/2637309949/micro/v3/service/api"
 	"github.com/2637309949/micro/v3/service/api/auth"
-	ahandler "github.com/2637309949/micro/v3/service/api/handler"
+	"github.com/2637309949/micro/v3/service/api/handler"
 	aapi "github.com/2637309949/micro/v3/service/api/handler/api"
 	"github.com/2637309949/micro/v3/service/api/handler/event"
 	ahttp "github.com/2637309949/micro/v3/service/api/handler/http"
-	arpc "github.com/2637309949/micro/v3/service/api/handler/rpc"
+	"github.com/2637309949/micro/v3/service/api/handler/rpc"
 	"github.com/2637309949/micro/v3/service/api/handler/web"
 	"github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/resolver/grpc"
@@ -25,8 +24,8 @@ import (
 	"github.com/2637309949/micro/v3/service/api/router"
 	regRouter "github.com/2637309949/micro/v3/service/api/router/registry"
 	httpapi "github.com/2637309949/micro/v3/service/api/server/http"
-	log "github.com/2637309949/micro/v3/service/logger"
-	muregistry "github.com/2637309949/micro/v3/service/registry"
+	"github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/registry"
 	"github.com/2637309949/micro/v3/service/store"
 	"github.com/2637309949/micro/v3/util/acme"
 	"github.com/2637309949/micro/v3/util/acme/autocert"
@@ -151,23 +150,23 @@ func Run(ctx *cli.Context) error {
 	srv := service.New(service.Name(Name))
 
 	// Init API
-	var opts []apiserver.Option
+	var opts []api.Option
 
 	if ctx.Bool("enable_acme") {
 		hosts := helper.ACMEHosts(ctx)
-		opts = append(opts, apiserver.EnableACME(true))
-		opts = append(opts, apiserver.ACMEHosts(hosts...))
+		opts = append(opts, api.EnableACME(true))
+		opts = append(opts, api.ACMEHosts(hosts...))
 		switch ACMEProvider {
 		case "autocert":
-			opts = append(opts, apiserver.ACMEProvider(autocert.NewProvider()))
+			opts = append(opts, api.ACMEProvider(autocert.NewProvider()))
 		case "certmagic":
 			if ACMEChallengeProvider != "cloudflare" {
-				log.Fatal("The only implemented DNS challenge provider is cloudflare")
+				logger.Fatal("The only implemented DNS challenge provider is cloudflare")
 			}
 
 			apiToken := os.Getenv("CF_API_TOKEN")
 			if len(apiToken) == 0 {
-				log.Fatal("env variables CF_API_TOKEN and CF_ACCOUNT_ID must be set")
+				logger.Fatal("env variables CF_API_TOKEN and CF_ACCOUNT_ID must be set")
 			}
 
 			storage := certmagic.NewStorage(
@@ -180,11 +179,11 @@ func Run(ctx *cli.Context) error {
 			config.ZoneToken = apiToken
 			challengeProvider, err := cloudflare.NewDNSProviderConfig(config)
 			if err != nil {
-				log.Fatal(err.Error())
+				logger.Fatal(err.Error())
 			}
 
 			opts = append(opts,
-				apiserver.ACMEProvider(
+				api.ACMEProvider(
 					certmagic.NewProvider(
 						acme.AcceptToS(true),
 						acme.CA(ACMECA),
@@ -195,7 +194,7 @@ func Run(ctx *cli.Context) error {
 				),
 			)
 		default:
-			log.Fatalf("%s is not a valid ACME provider\n", ACMEProvider)
+			logger.Fatalf("%s is not a valid ACME provider\n", ACMEProvider)
 		}
 	} else if ctx.Bool("enable_tls") {
 		config, err := helper.TLSConfig(ctx)
@@ -204,12 +203,12 @@ func Run(ctx *cli.Context) error {
 			return err
 		}
 
-		opts = append(opts, apiserver.EnableTLS(true))
-		opts = append(opts, apiserver.TLSConfig(config))
+		opts = append(opts, api.EnableTLS(true))
+		opts = append(opts, api.TLSConfig(config))
 	}
 
 	if ctx.Bool("enable_cors") {
-		opts = append(opts, apiserver.EnableCORS(true))
+		opts = append(opts, api.EnableCORS(true))
 	}
 
 	// create the router
@@ -257,77 +256,77 @@ func Run(ctx *cli.Context) error {
 
 	switch Handler {
 	case "rpc":
-		log.Infof("Registering API RPC Handler at %s", APIPath)
+		logger.Infof("Registering API RPC Handler at %s", APIPath)
 		rt := regRouter.NewRouter(
-			router.WithHandler(arpc.Handler),
+			router.WithHandler(rpc.Handler),
 			router.WithResolver(rr),
-			router.WithRegistry(muregistry.DefaultRegistry),
+			router.WithRegistry(registry.DefaultRegistry),
 		)
-		rp := arpc.NewHandler(
-			ahandler.WithNamespace(Namespace),
-			ahandler.WithRouter(rt),
-			ahandler.WithClient(srv.Client()),
+		rp := rpc.NewHandler(
+			handler.WithNamespace(Namespace),
+			handler.WithRouter(rt),
+			handler.WithClient(srv.Client()),
 		)
 		r.PathPrefix(APIPath).Handler(rp)
 	case "api":
-		log.Infof("Registering API Request Handler at %s", APIPath)
+		logger.Infof("Registering API Request Handler at %s", APIPath)
 		rt := regRouter.NewRouter(
 			router.WithHandler(aapi.Handler),
 			router.WithResolver(rr),
-			router.WithRegistry(muregistry.DefaultRegistry),
+			router.WithRegistry(registry.DefaultRegistry),
 		)
 		ap := aapi.NewHandler(
-			ahandler.WithNamespace(Namespace),
-			ahandler.WithRouter(rt),
-			ahandler.WithClient(srv.Client()),
+			handler.WithNamespace(Namespace),
+			handler.WithRouter(rt),
+			handler.WithClient(srv.Client()),
 		)
 		r.PathPrefix(APIPath).Handler(ap)
 	case "event":
-		log.Infof("Registering API Event Handler at %s", APIPath)
+		logger.Infof("Registering API Event Handler at %s", APIPath)
 		rt := regRouter.NewRouter(
 			router.WithHandler(event.Handler),
 			router.WithResolver(rr),
-			router.WithRegistry(muregistry.DefaultRegistry),
+			router.WithRegistry(registry.DefaultRegistry),
 		)
 		ev := event.NewHandler(
-			ahandler.WithNamespace(Namespace),
-			ahandler.WithRouter(rt),
-			ahandler.WithClient(srv.Client()),
+			handler.WithNamespace(Namespace),
+			handler.WithRouter(rt),
+			handler.WithClient(srv.Client()),
 		)
 		r.PathPrefix(APIPath).Handler(ev)
 	case "http":
-		log.Infof("Registering API HTTP Handler at %s", ProxyPath)
+		logger.Infof("Registering API HTTP Handler at %s", ProxyPath)
 		rt := regRouter.NewRouter(
 			router.WithHandler(ahttp.Handler),
 			router.WithResolver(rr),
-			router.WithRegistry(muregistry.DefaultRegistry),
+			router.WithRegistry(registry.DefaultRegistry),
 		)
 		ht := ahttp.NewHandler(
-			ahandler.WithNamespace(Namespace),
-			ahandler.WithRouter(rt),
-			ahandler.WithClient(srv.Client()),
+			handler.WithNamespace(Namespace),
+			handler.WithRouter(rt),
+			handler.WithClient(srv.Client()),
 		)
 		r.PathPrefix(ProxyPath).Handler(ht)
 	case "web":
-		log.Infof("Registering API Web Handler at %s", APIPath)
+		logger.Infof("Registering API Web Handler at %s", APIPath)
 		rt := regRouter.NewRouter(
 			router.WithHandler(web.Handler),
 			router.WithResolver(rr),
-			router.WithRegistry(muregistry.DefaultRegistry),
+			router.WithRegistry(registry.DefaultRegistry),
 		)
 		w := web.NewHandler(
-			ahandler.WithNamespace(Namespace),
-			ahandler.WithRouter(rt),
-			ahandler.WithClient(srv.Client()),
+			handler.WithNamespace(Namespace),
+			handler.WithRouter(rt),
+			handler.WithClient(srv.Client()),
 		)
 		r.PathPrefix(APIPath).Handler(w)
 	default:
-		log.Infof("Registering API Default Handler at %s", APIPath)
+		logger.Infof("Registering API Default Handler at %s", APIPath)
 		rt := regRouter.NewRouter(
 			router.WithResolver(rr),
-			router.WithRegistry(muregistry.DefaultRegistry),
+			router.WithRegistry(registry.DefaultRegistry),
 		)
-		r.PathPrefix(APIPath).Handler(Meta(srv, rt, Namespace))
+		r.PathPrefix(APIPath).Handler(Meta(srv.Client(), rt, Namespace))
 	}
 
 	// register all the http handler plugins
@@ -346,10 +345,10 @@ func Run(ctx *cli.Context) error {
 		opentelemetry.WithServiceName("API"),
 		opentelemetry.WithTraceReporterAddress(reporterAddress),
 	)
-	log.Infof("Setting jaeger global tracer to %s", reporterAddress)
+	logger.Infof("Setting jaeger global tracer to %s", reporterAddress)
 	defer traceCloser.Close() // Make sure we flush any pending traces before shutdown:
 	if err != nil {
-		log.Warnf("Unable to prepare a Jaeger tracer: %s", err)
+		logger.Warnf("Unable to prepare a Jaeger tracer: %s", err)
 	} else {
 		// Set the global default opentracing tracer:
 		opentracing.SetGlobalTracer(openTracer)
@@ -366,24 +365,25 @@ func Run(ctx *cli.Context) error {
 	api := httpapi.NewServer(Address)
 	// initialise
 	api.Init(opts...)
-	// register the handler
+	// register the http handler
 	api.Handle("/", h)
 
 	// Start API
 	if err := api.Start(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
-	pb.RegisterApiHandler(srv.Server(), &ahandler.APIHandler{})
+	// register the rpc handler
+	pb.RegisterApiHandler(srv.Server(), &handler.APIHandler{})
 
 	// Run server
 	if err := srv.Run(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	// Stop API
 	if err := api.Stop(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	return nil

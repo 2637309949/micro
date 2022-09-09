@@ -17,9 +17,19 @@ package kubernetes
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/2637309949/micro/v3/service/router"
 )
+
+var prefixDns string = "cluster.local"
+
+func init() {
+	prefix, ok := os.LookupEnv("K8S_DNS_PREFIX")
+	if ok {
+		prefixDns = prefix
+	}
+}
 
 // NewRouter returns an initialized kubernetes router
 func NewRouter(opts ...router.Option) router.Router {
@@ -55,7 +65,7 @@ func (k *kubernetes) Lookup(service string, opts ...router.LookupOption) ([]rout
 		options.Network = "micro"
 	}
 
-	address := fmt.Sprintf("%v.%v.svc.cluster.local:8080", service, options.Network)
+	address := fmt.Sprintf("%v.%v.svc.%s:8080", service, options.Network, prefixDns)
 
 	return []router.Route{
 		router.Route{

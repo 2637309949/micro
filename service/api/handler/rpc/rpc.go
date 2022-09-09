@@ -29,6 +29,7 @@ import (
 	"github.com/2637309949/micro/v3/service/errors"
 	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/util/codec/bytes"
+	"github.com/2637309949/micro/v3/util/ctx"
 	xhttp "github.com/2637309949/micro/v3/util/http"
 	"github.com/2637309949/micro/v3/util/router"
 )
@@ -71,10 +72,12 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 	var service *api.Service
+	var c client.Client
 
-	if h.s != nil {
+	if v, ok := r.Context().(handler.Context); ok {
 		// we were given the service
-		service = h.s
+		service = v.Service()
+		c = v.Client()
 	} else if h.opts.Router != nil {
 		// try get service from router
 		s, err := h.opts.Router.Route(r)
@@ -84,6 +87,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		service = s
+		c = h.opts.Client
 	} else {
 		// we have no way of routing the request
 		err := errors.InternalServerError("go.micro.api", "no route found")
@@ -98,13 +102,14 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ct = ct[:idx]
 	}
 
-	// micro client
-	c := h.opts.Client
+	// create context
+	cx := ctx.FromRequest(r)
+
 	// set merged context to request
-	*r = *r.Clone(r.Context())
+	*r = *r.Clone(cx)
 	// if stream we currently only support json
 	if isStream(r, service) {
-		serveStream(r.Context(), w, r, service, c)
+		serveStream(cx, w, r, service, c)
 		return
 	}
 
@@ -141,7 +146,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// make the call
 		var response *bytes.Frame
-		if err := c.Call(r.Context(), req, response, callOpt); err != nil {
+		if err := c.Call(cx, req, response, callOpt); err != nil {
 			xhttp.WriteError(w, r, err)
 			return
 		}
@@ -169,7 +174,7 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			client.WithContentType(ct),
 		)
 		// make the call
-		if err := c.Call(r.Context(), req, &response, callOpt); err != nil {
+		if err := c.Call(cx, req, &response, callOpt); err != nil {
 			xhttp.WriteError(w, r, err)
 			return
 		}
@@ -181,11 +186,11 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			xhttp.WriteError(w, r, err)
 			return
 		}
-		rsp = xhttp.Marshal(r.Context(), rsp)
+		rsp = xhttp.Marshal(cx, rsp)
 	}
 
 	// write the response
-	writeResponse(w, r, rsp)
+	writeResponse(w, r, rsp, ct)
 }
 
 func (rh *rpcHandler) String() string {
@@ -201,8 +206,8 @@ func hasCodec(ct string, codecs []string) bool {
 	return false
 }
 
-func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte) {
-	w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+func writeResponse(w http.ResponseWriter, r *http.Request, rsp []byte, ct string) {
+	w.Header().Set("Content-Type", ct)
 	w.Header().Set("Content-Length", strconv.Itoa(len(rsp)))
 
 	if len(w.Header().Get("Content-Type")) == 0 {

@@ -54,10 +54,12 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var service *goapi.Service
+	var c client.Client
 
-	if a.s != nil {
+	if v, ok := r.Context().(handler.Context); ok {
 		// we were given the service
-		service = a.s
+		service = v.Service()
+		c = v.Client()
 	} else if a.opts.Router != nil {
 		// try get service from router
 		s, err := a.opts.Router.Route(r)
@@ -67,6 +69,7 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		service = s
+		c = a.opts.Client
 	} else {
 		// we have no way of routing the request
 		er := errors.InternalServerError("go.micro.api", "no route found")
@@ -75,7 +78,6 @@ func (a *apiHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create request and response
-	c := a.opts.Client
 	req := c.NewRequest(service.Name, service.Endpoint.Name, request)
 	rsp := &api.Response{}
 
@@ -109,13 +111,5 @@ func NewHandler(opts ...handler.Option) handler.Handler {
 	options := handler.NewOptions(opts...)
 	return &apiHandler{
 		opts: options,
-	}
-}
-
-func WithService(s *goapi.Service, opts ...handler.Option) handler.Handler {
-	options := handler.NewOptions(opts...)
-	return &apiHandler{
-		opts: options,
-		s:    s,
 	}
 }
