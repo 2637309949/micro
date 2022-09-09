@@ -89,7 +89,27 @@ and `micro user set [namespace]`.
 ### From Source
 
 ```
+go install github.com/2637309949/micro/v3@latest
+```
+
+### Install Binaries
+
+#### Windows
+
+```sh
+powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.ps1 | iex"
+
+```
+#### Linux
+
+```sh
 wget -q  https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh -O - | /bin/bash
+```
+
+#### MacOS
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/2637309949/micro/master/scripts/install.sh | /bin/bash
 ```
 
 ### Run the server 
@@ -149,9 +169,9 @@ Creating service helloworld
 ├── main.go
 ├── generate.go
 ├── handler
-│   └── helloworld.go
+│   └── helloworld.go
 ├── proto
-│   └── helloworld.proto
+│   └── helloworld.proto
 ├── Dockerfile
 ├── Makefile
 ├── README.md

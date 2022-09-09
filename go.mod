@@ -45,7 +45,7 @@ require (
 	github.com/oxtoacart/bpool v0.0.0-20190530202638-03653db5a59c
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pkg/errors v0.9.1
-	github.com/prometheus/client_golang v1.11.0
+	github.com/prometheus/client_golang v1.11.1
 	github.com/rs/cors v1.8.2 // indirect
 	github.com/serenize/snaker v0.0.0-20171204205717-a683aaf2d516
 	github.com/stoewer/go-strcase v1.2.0
@@ -57,7 +57,9 @@ require (
 	github.com/urfave/cli/v2 v2.3.0
 	github.com/xlab/treeprint v0.0.0-20181112141820-a009c3971eca
 	go.etcd.io/bbolt v1.3.6
-	go.etcd.io/etcd v0.5.0-alpha.5.0.20200425165423-262c93980547
+	go.etcd.io/etcd v0.0.0-20200513171258-e048e166ab9c
+	go.etcd.io/etcd/api/v3 v3.5.4
+	go.etcd.io/etcd/client/v3 v3.5.4
 	go.uber.org/zap v1.17.0
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d
@@ -66,7 +68,3 @@ require (
 	google.golang.org/protobuf v1.28.0
 	tailscale.com v1.28.0
 )
-
-// This can be removed once etcd becomes go gettable, version 3.4 and 3.5 is not,
-// see https://github.com/etcd-io/etcd/issues/11154 and https://github.com/etcd-io/etcd/issues/11931.
-replace google.golang.org/grpc => google.golang.org/grpc v1.27.1
