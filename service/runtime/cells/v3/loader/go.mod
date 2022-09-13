@@ -2,7 +2,7 @@ module github.com/2637309949/micro/service/runtime/cells/go/loader
 
 go 1.18
 
-require github.com/2637309949/micro/v3 v3.8.9
+require github.com/2637309949/micro/v3 v3.9.0
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
