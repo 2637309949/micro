@@ -63,11 +63,8 @@ require (
 	golang.org/x/crypto v0.0.0-20220722155217-630584e8d5aa
 	golang.org/x/net v0.0.0-20220607020251-c690dde0001d
 	google.golang.org/genproto v0.0.0-20220421151946-72621c1f0bd3
-	google.golang.org/grpc v1.45.0
+	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
 	tailscale.com v1.30.1
 )
-
-// fix error code PROTOCOL_ERROR
-replace google.golang.org/grpc => google.golang.org/grpc v1.40.0

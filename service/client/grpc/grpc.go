@@ -86,11 +86,13 @@ func (g *grpcClient) secure(addr string) grpc.DialOption {
 }
 
 func (g *grpcClient) call(ctx context.Context, addr string, req client.Request, rsp interface{}, opts client.CallOptions) error {
-
 	header := make(map[string]string)
 	if md, ok := metadata.FromContext(ctx); ok {
 		header = make(map[string]string, len(md))
 		for k, v := range md {
+			if k == "Connection" { //fix: protocol
+				continue
+			}
 			header[strings.ToLower(k)] = v
 		}
 	} else {
