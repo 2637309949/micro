@@ -31,7 +31,6 @@ import (
 	"github.com/2637309949/micro/v3/util/codec/bytes"
 	"github.com/2637309949/micro/v3/util/ctx"
 	xhttp "github.com/2637309949/micro/v3/util/http"
-	"github.com/2637309949/micro/v3/util/router"
 )
 
 const (
@@ -114,7 +113,13 @@ func (h *rpcHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// create custom router
-	callOpt := client.WithRouter(router.New(service.Services))
+	var nodes []string
+	for _, service := range service.Services {
+		for _, node := range service.Nodes {
+			nodes = append(nodes, node.Address)
+		}
+	}
+	callOpt := client.WithAddress(nodes...)
 
 	// walk the standard call path
 	// get payload
