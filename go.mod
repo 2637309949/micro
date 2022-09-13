@@ -32,6 +32,8 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/klauspost/cpuid v1.3.1 // indirect
 	github.com/kr/pretty v0.3.0
+	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
+	github.com/lestrrat-go/strftime v1.0.6 // indirect
 	github.com/lib/pq v1.10.7
 	github.com/miekg/dns v1.1.43
 	github.com/mitchellh/hashstructure v1.1.0

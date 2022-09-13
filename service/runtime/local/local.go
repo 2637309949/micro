@@ -23,10 +23,12 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/service/runtime"
 	"github.com/hpcloud/tail"
+	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 )
 
 // defaultNamespace to use if not provided as an option
@@ -90,7 +92,7 @@ func (r *localRuntime) Init(opts ...runtime.Option) error {
 func logFile(serviceName string) string {
 	// make the directory
 	name := strings.Replace(serviceName, "/", "-", -1)
-	return filepath.Join(LogDir, fmt.Sprintf("%v.log", name))
+	return filepath.Join(LogDir, name)
 }
 
 func serviceKey(s *runtime.Service) string {
@@ -157,8 +159,9 @@ func (r *localRuntime) Create(resource runtime.Resource, opts ...runtime.CreateO
 
 		// create new service
 		service := newService(s, options)
-
-		f, err := os.OpenFile(logFile(service.Name), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		name := strings.Replace(service.Name, "/", "-", -1)
+		lgDir := logFile(service.Name)
+		f, err := rotatelogs.New(lgDir+"/"+name+"-%Y%m%d", rotatelogs.WithMaxAge(24*time.Hour), rotatelogs.WithRotationTime(24*time.Hour))
 		if err != nil {
 			log.Fatal(err)
 		}
