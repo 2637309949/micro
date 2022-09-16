@@ -20,7 +20,7 @@ import (
 	"github.com/2637309949/micro/v3/service/api/resolver"
 	"github.com/2637309949/micro/v3/service/api/resolver/subdomain"
 	"github.com/2637309949/micro/v3/service/auth"
-	log "github.com/2637309949/micro/v3/service/logger"
+	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/service/registry"
 	"github.com/2637309949/micro/v3/service/router"
 	regRouter "github.com/2637309949/micro/v3/service/router/registry"
@@ -175,7 +175,7 @@ func (s *srv) indexHandler(w http.ResponseWriter, r *http.Request) {
 
 	services, err := s.registry.ListServices(registry.ListDomain(domain))
 	if err != nil {
-		log.Printf("Error listing services: %v", err)
+		logger.Errorf("Error listing services: %v", err)
 	}
 
 	type webService struct {
@@ -342,7 +342,7 @@ func (s *srv) registryHandler(w http.ResponseWriter, r *http.Request) {
 
 	services, err := s.registry.ListServices(registry.ListDomain(domain))
 	if err != nil {
-		log.Printf("Error listing services: %v", err)
+		logger.Errorf("Error listing services: %v", err)
 	}
 
 	sort.Sort(sortedServices{services})
@@ -372,7 +372,7 @@ func (s *srv) callHandler(w http.ResponseWriter, r *http.Request) {
 
 	services, err := s.registry.ListServices(registry.ListDomain(domain))
 	if err != nil {
-		log.Printf("Error listing services: %v", err)
+		logger.Errorf("Error listing services: %v", err)
 	}
 
 	sort.Sort(sortedServices{services})
@@ -425,7 +425,7 @@ func (s *srv) serviceHandler(w http.ResponseWriter, r *http.Request) {
 
 	services, err := s.registry.GetService(name, registry.GetDomain(domain))
 	if err != nil {
-		log.Printf("Error getting service %s: %v", name, err)
+		logger.Errorf("Error getting service %s: %v", name, err)
 	}
 
 	sort.Sort(sortedServices{services})
@@ -623,7 +623,7 @@ func Run(ctx *cli.Context) error {
 	}
 
 	if err := server.ListenAndServe(); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	return nil
