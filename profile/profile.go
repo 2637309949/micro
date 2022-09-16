@@ -54,7 +54,6 @@ import (
 
 // profiles which when called will configure micro to run in that environment
 var profiles = map[string]*Profile{
-	// built in profiles
 	"client":     Client,
 	"service":    Service,
 	"server":     Server,

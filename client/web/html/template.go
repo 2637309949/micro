@@ -1,7 +1,7 @@
-package web
+package html
 
 var (
-	loginTemplate = `
+	LoginTemplate = `
 	{{define "basic"}}
 		<html>
 		<head>
@@ -51,7 +51,7 @@ var (
 	{{end}}
 `
 
-	layoutTemplate = `
+	LayoutTemplate = `
 {{define "layout"}}
 <html>
 	<head>
@@ -70,6 +70,7 @@ var (
 		  #navBar, .navbar-toggle { margin-top: 15px; }
 		  .icon-bar { background-color: #333333; }
 		  .nav>li>a:focus, .nav>li>a:hover { background-color: white; }
+		  .logo { font-size: 2em; }
 		 .search {
 		    position: relative;
 		    max-width: 600px;
@@ -107,7 +108,7 @@ var (
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span> 
                 </button>
-                <a class="navbar-brand logo" href="/"><img src="https://micro.dev/images/logo.png" height=50px width=auto style="margin-bottom: 5px;" /></a>
+                <a class="navbar-brand logo" href="/">Micro</a>
               </div>
               <div class="collapse navbar-collapse" id="navBar">
 	        <ul class="nav navbar-nav navbar-right" id="dev">
@@ -162,7 +163,7 @@ var (
 {{ define "heading" }}<h3>&nbsp;</h3>{{end}}
 `
 
-	indexTemplate = `
+	IndexTemplate = `
 {{define "title"}}Home{{end}}
 {{define "heading"}}<h4><input class="form-control input-lg search" type=text placeholder="Search" autofocus></h4>{{end}}
 {{define "style" }}
@@ -261,9 +262,9 @@ jQuery(function($, undefined) {
 </script>
 {{end}}
 `
-	callTemplate = `
+	CallTemplate = `
 {{define "title"}}Client{{end}}
-{{define "heading"}}<a href="/">&nbsp;< Back</a><h3>Micro Client</h3>{{end}}
+{{define "heading"}}<h3>Client</h3>{{end}}
 {{define "style"}}
 	pre {
 		word-wrap: break-word;
@@ -400,12 +401,14 @@ jQuery(function($, undefined) {
 				}
 				console.log(req.responseText);
 			}
+
+			var service = document.forms[0].elements["service"].value;
 			var endpoint = document.forms[0].elements["endpoint"].value
 			if (!($('#otherendpoint').prop('disabled'))) {
 				endpoint = document.forms[0].elements["otherendpoint"].value
 			}
 
-			var reqBody;
+			var request;
 			var headers;
 
 			try {
@@ -415,20 +418,18 @@ jQuery(function($, undefined) {
 					headers = JSON.parse(md);
 				}
 				if (rq.length > 0) {
-					reqBody = JSON.parse(rq);
+					request = JSON.parse(rq);
 				};
 			} catch(e) {
 				document.getElementById("response").innerText = "Invalid request: " + e.message;
 				return false;
 			}
 
-			var request = {
-				"service": document.forms[0].elements["service"].value,
-				"endpoint": endpoint,
-				"request": reqBody
-			}
-			req.open("POST", "/rpc", true);
-			req.setRequestHeader("Content-Type","application/json");
+			endpoint = endpoint.replace(".", "/");
+
+			req.open("POST", "{{.ApiURL}}/" + service + "/" + endpoint, true);
+			req.setRequestHeader("Content-type","application/json");
+			req.setRequestHeader("Authorization", {{.Token}});
 
 			if (headers != undefined) {
 				for (let [key, value] of Object.entries(headers)) {
@@ -443,12 +444,12 @@ jQuery(function($, undefined) {
 	</script>
 {{end}}
 `
-	registryTemplate = `
-{{define "heading"}}<a href="/">&nbsp;< Back</a><h4><input class="form-control input-lg search" type=text placeholder="Search" autofocus></h4>{{end}}
+	RegistryTemplate = `
+{{define "heading"}}<h4><input class="form-control input-lg search" type=text placeholder="Search" autofocus></h4>{{end}}
 {{define "title"}}Services{{end}}
 {{define "content"}}
 	<p style="margin: 0;">&nbsp;</p>
-        <div style="max-width: 600px; margin: 0 auto; height: calc(100vh - 200px); overflow: scroll;">
+	<div style="max-width: 600px; margin: 0 auto; min-height: 400px; height: calc(100vh - 400px); overflow: scroll;">
 	{{range .Results}}
 	<div style="margin: 5px 5px 5px 15px;">
 	    <a href="/service/{{.Name}}" data-filter={{.Name}} class="service">{{.Name}}</a>
@@ -472,9 +473,9 @@ jQuery(function($, undefined) {
 {{end}}
 `
 
-	serviceTemplate = `
+	ServiceTemplate = `
 {{define "title"}}Service{{end}}
-{{define "heading"}}<a href="/">&nbsp;< Back</a><h3>Micro {{with $svc := index .Results 0}}{{Title $svc.Name}}{{end}}</h3>{{end}}
+{{define "heading"}}<h3>{{with $svc := index .Results 0}}{{Title $svc.Name}}{{end}}</h3>{{end}}
 {{define "style"}}
 .table>tbody>tr>th, .table>tbody>tr>td {
     border-top: none;
@@ -557,9 +558,9 @@ pre {padding: 20px;}
 
 `
 
-	webTemplate = `
+	WebTemplate = `
 {{define "title"}}{{Title .Name}}{{end}}
-{{define "heading"}}<a href="/">&nbsp;< Back</a><h3>&nbsp;Micro {{Title .Name}}</h3>{{end}}
+{{define "heading"}}<h3>{{Title .Name}}</h3>{{end}}
 {{define "style"}}
 	pre {
 		word-wrap: break-word;
@@ -697,7 +698,7 @@ pre {padding: 20px;}
 			var service = document.forms[0].elements["service"].value
 			var endpoint = document.forms[0].elements["endpoint"].value
 
-			var reqBody;
+			var request;
 			var headers;
 
 			try {
@@ -714,20 +715,17 @@ pre {padding: 20px;}
 					}
 				};
 				console.log(data);
-				reqBody = data;
+				request = data;
 			} catch(e) {
 				document.getElementById("response").innerText = "Invalid request: " + e.message;
 				return false;
 			}
 
-			var request = {
-				"service": service,
-				"endpoint": endpoint,
-				"request": reqBody
-			}
-			req.open("POST", "/rpc", true);
-			req.setRequestHeader("Content-type","application/json");
+			endpoint = endpoint.replace(".", "/");
 
+			req.open("POST", "{{.ApiURL}}/" + service + "/" + endpoint, true);
+			req.setRequestHeader("Content-type","application/json");
+			req.setRequestHeader("Authorization", {{.Token}});
 			if (headers != undefined) {
 				for (let [key, value] of Object.entries(headers)) {
 					req.setRequestHeader(key, value);
@@ -742,7 +740,7 @@ pre {padding: 20px;}
 {{end}}
 `
 
-	notFoundTemplate = `
+	NotFoundTemplate = `
 {{define "title"}}404: Not Found{{end}}
 {{define "heading"}}<h3>404: Not Found</h3>{{end}}
 {{define "content"}}<p>The requested page could not be found</p>{{end}}`
