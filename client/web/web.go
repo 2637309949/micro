@@ -2,6 +2,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -16,14 +17,9 @@ import (
 
 	"github.com/2637309949/micro/v3/client/web/html"
 	"github.com/2637309949/micro/v3/cmd"
-	apiAuth "github.com/2637309949/micro/v3/service/api/auth"
-	"github.com/2637309949/micro/v3/service/api/resolver"
-	"github.com/2637309949/micro/v3/service/api/resolver/subdomain"
 	"github.com/2637309949/micro/v3/service/auth"
 	"github.com/2637309949/micro/v3/service/logger"
 	"github.com/2637309949/micro/v3/service/registry"
-	"github.com/2637309949/micro/v3/service/router"
-	regRouter "github.com/2637309949/micro/v3/service/router/registry"
 	cx "github.com/2637309949/micro/v3/util/ctx"
 	"github.com/fatih/camelcase"
 	"github.com/gorilla/mux"
@@ -43,14 +39,16 @@ var (
 	Host, _ = os.Hostname()
 	// Token cookie name
 	TokenCookieName = "micro-token"
+
+	// create a session store
+	mtx      sync.RWMutex
+	sessions = map[string]*session{}
 )
 
 type srv struct {
 	*mux.Router
 	// registry we use
 	registry registry.Registry
-	// the resolver
-	resolver resolver.Resolver
 }
 
 type reg struct {
@@ -59,6 +57,13 @@ type reg struct {
 	sync.RWMutex
 	lastPull time.Time
 	services []*registry.Service
+}
+
+type session struct {
+	// account related to the session
+	Account *auth.Account
+	// token used for the session
+	Token string
 }
 
 func init() {
@@ -88,6 +93,36 @@ func (s *srv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, LoginURL, 302)
 			return
 		}
+
+		// if we have a session retrieve it
+		mtx.RLock()
+		sess, ok := sessions[token]
+		mtx.RUnlock()
+
+		// no session, go get the account
+		if !ok {
+			// can't inspect the token
+			acc, err := auth.Inspect(token)
+			if err != nil {
+				http.Error(w, "Unauthorized", 401)
+				return
+			}
+
+			// save the session
+			mtx.Lock()
+			sess = &session{
+				Account: acc,
+				Token:   token,
+			}
+			sessions[token] = sess
+			mtx.Unlock()
+		}
+
+		// create a new context
+		ctx := context.WithValue(r.Context(), session{}, sess)
+
+		// redefine request with context
+		r = r.Clone(ctx)
 	}
 
 	// set defaults on the request
@@ -167,11 +202,7 @@ func (s *srv) indexHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if we're using the subdomain resolver, we want to use a custom domain
 	domain := registry.DefaultDomain
-	if res, ok := s.resolver.(*subdomain.Resolver); ok {
-		domain = res.Domain(r)
-	}
 
 	services, err := s.registry.ListServices(registry.ListDomain(domain))
 	if err != nil {
@@ -305,11 +336,7 @@ func (s *srv) registryHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	svc := vars["name"]
 
-	// if we're using the subdomain resolver, we want to use a custom domain
 	domain := registry.DefaultDomain
-	if res, ok := s.resolver.(*subdomain.Resolver); ok {
-		domain = res.Domain(r)
-	}
 
 	if len(svc) > 0 {
 		sv, err := s.registry.GetService(svc, registry.GetDomain(domain))
@@ -364,11 +391,7 @@ func (s *srv) registryHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *srv) callHandler(w http.ResponseWriter, r *http.Request) {
-	// if we're using the subdomain resolver, we want to use a custom domain
 	domain := registry.DefaultDomain
-	if res, ok := s.resolver.(*subdomain.Resolver); ok {
-		domain = res.Domain(r)
-	}
 
 	services, err := s.registry.ListServices(registry.ListDomain(domain))
 	if err != nil {
@@ -417,11 +440,7 @@ func (s *srv) serviceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// if we're using the subdomain resolver, we want to use a custom domain
 	domain := registry.DefaultDomain
-	if res, ok := s.resolver.(*subdomain.Resolver); ok {
-		domain = res.Domain(r)
-	}
 
 	services, err := s.registry.GetService(name, registry.GetDomain(domain))
 	if err != nil {
@@ -505,11 +524,12 @@ func (s *srv) render(w http.ResponseWriter, r *http.Request, tmpl string, data i
 	loginTitle := "Login"
 	loginLink := LoginURL
 	user := ""
-	token := r.Header.Get("Authorization")
+	token := ""
 
-	acc, ok := auth.AccountFromContext(r.Context())
+	sess, ok := r.Context().Value(session{}).(*session)
 	if ok {
-		user = acc.ID
+		token = sess.Token
+		user = sess.Account.ID
 		loginTitle = "Logout"
 		loginLink = "/logout"
 	}
@@ -521,6 +541,7 @@ func (s *srv) render(w http.ResponseWriter, r *http.Request, tmpl string, data i
 		"Results":    data,
 		"User":       user,
 		"Token":      token,
+		"Namespace":  Namespace,
 	}
 
 	// add extra values
@@ -542,9 +563,6 @@ func Run(ctx *cli.Context) error {
 	if len(ctx.String("server_name")) > 0 {
 		Name = ctx.String("server_name")
 	}
-	if len(ctx.String("resolver")) > 0 {
-		Resolver = ctx.String("resolver")
-	}
 	if len(ctx.String("web_address")) > 0 {
 		Address = ctx.String("web_address")
 	}
@@ -564,30 +582,11 @@ func Run(ctx *cli.Context) error {
 		LoginURL = ctx.String("login_url")
 	}
 
-	// Setup the web resolver
-	var res resolver.Resolver
-
-	// the default resolver
-	res = &WebResolver{
-		Router: regRouter.NewRouter(
-			router.Registry(registry.DefaultRegistry),
-		),
-		Options: resolver.NewOptions(resolver.WithServicePrefix(
-			Namespace,
-		)),
-	}
-
-	// switch for subdomain resolver
-	if Resolver == "subdomain" {
-		res = subdomain.NewResolver(res)
-	}
-
 	srv := &srv{
 		Router: mux.NewRouter(),
 		registry: &reg{
 			Registry: registry.DefaultRegistry,
 		},
-		resolver: res,
 	}
 	// extrace context from header
 	srv.Use(func(next http.Handler) http.Handler {
@@ -596,8 +595,6 @@ func Run(ctx *cli.Context) error {
 			next.ServeHTTP(w, r)
 		})
 	})
-
-	var h http.Handler = srv
 
 	// the web handler itself
 	srv.HandleFunc("/favicon.ico", faviconHandler)
@@ -610,16 +607,10 @@ func Run(ctx *cli.Context) error {
 	srv.HandleFunc("/{service}", srv.serviceHandler)
 	srv.HandleFunc("/", srv.indexHandler)
 
-	// set the login url
-	auth.DefaultAuth.Init(auth.LoginURL(LoginURL))
-
-	// create the service and add the auth wrapper
-	aw := apiAuth.Wrapper(srv.resolver, Namespace)
-
 	// create new http server
 	server := &http.Server{
 		Addr:    Address,
-		Handler: aw(h),
+		Handler: srv,
 	}
 
 	if err := server.ListenAndServe(); err != nil {
@@ -645,11 +636,6 @@ var (
 			Name:    "namespace",
 			Usage:   "Set the namespace used by the Web proxy e.g. com.example.web",
 			EnvVars: []string{"MICRO_WEB_NAMESPACE"},
-		},
-		&cli.StringFlag{
-			Name:    "resolver",
-			Usage:   "Set the resolver to route to services e.g path, domain",
-			EnvVars: []string{"MICRO_WEB_RESOLVER"},
 		},
 		&cli.StringFlag{
 			Name:    "login_url",
