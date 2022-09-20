@@ -177,7 +177,7 @@ func GetService(c *cli.Context, args []string) ([]byte, error) {
 	return []byte(strings.Join(output, "\n")), nil
 }
 
-func ListServices(c *cli.Context, args []string) ([]byte, error) {
+func ListServices(c *cli.Context, _ []string) ([]byte, error) {
 	var rsp []*registry.Service
 	var err error
 
