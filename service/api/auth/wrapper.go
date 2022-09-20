@@ -139,12 +139,15 @@ func (a authWrapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		auth.VerifyNamespace(ns),
 	}
 
-	logger.Debugf("Resolving %v %v", resName, resEndpoint)
+	logger.Infof("------Resolving %v", acc)
+	logger.Infof("------Resolving %v %v", resName, resEndpoint)
 
 	// Perform the verification check to see if the account has access to
 	// the resource they're requesting
 	res := &auth.Resource{Type: "service", Name: resName, Endpoint: resEndpoint}
 	if err := auth.Verify(acc, res, verifyOpts...); err == nil {
+		logger.Infof("------Resolving nil")
+
 		// The account has the necessary permissions to access the resource
 		a.handler.ServeHTTP(w, req)
 		return
