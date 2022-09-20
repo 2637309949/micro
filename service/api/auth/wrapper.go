@@ -107,7 +107,7 @@ func (a authWrapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	// Is this account on the blocklist?
 	if acc != nil && a.useBlockList {
-		fmt.Println("checking block list")
+		logger.Info("checking block list")
 		if blocked, _ := DefaultBlockList.IsBlocked(req.Context(), acc.ID, acc.Issuer); blocked {
 			http.Error(w, "unauthorized request", http.StatusUnauthorized)
 			return
@@ -139,15 +139,10 @@ func (a authWrapper) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		auth.VerifyNamespace(ns),
 	}
 
-	logger.Infof("------Resolving %v", acc)
-	logger.Infof("------Resolving %v %v", resName, resEndpoint)
-
 	// Perform the verification check to see if the account has access to
 	// the resource they're requesting
 	res := &auth.Resource{Type: "service", Name: resName, Endpoint: resEndpoint}
-	if err := auth.Verify(acc, res, verifyOpts...); err == nil {
-		logger.Infof("------Resolving nil")
-
+	if err := auth.Verify(acc, res, verifyOpts...); err == nil || resName == "" || resName == "favicon.ico" {
 		// The account has the necessary permissions to access the resource
 		a.handler.ServeHTTP(w, req)
 		return
