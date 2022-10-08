@@ -82,7 +82,13 @@ First, we have to start the `micro server`. The command to do that is:
 micro server
 ```
 
-Before interacting with the `micro server`, we need to log in with the id 'admin' and password 'micro':
+Or using docker
+
+```
+sudo docker run -p 8080:8080 -p 8081:8081 ghcr.io/micro/micro:latest server
+```
+
+Before interacting with the `micro server`, we need to log in with the username 'admin' and password 'micro':
 
 ```sh
 $ micro login
@@ -275,12 +281,10 @@ Creating service helloworld
 
 .
 ├── main.go
-├── generate.go
 ├── handler
 │   └── helloworld.go
 ├── proto
 │   └── helloworld.proto
-├── Dockerfile
 ├── Makefile
 ├── README.md
 ├── .gitignore
