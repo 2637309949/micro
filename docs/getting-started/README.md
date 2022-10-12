@@ -64,13 +64,6 @@ powershell -Command "iwr -useb https://raw.githubusercontent.com/2637309949/micr
 docker pull 2637309949/micro
 ```
 
-### Helm Chart
-
-```
-helm repo add micro https://micro.github.io/helm
-helm install micro 2637309949/micro
-```
-
 ## Running a service
 
 Before diving into writing a service, let's run an existing one, because it's just a few commands away!
