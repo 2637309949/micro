@@ -54,13 +54,13 @@ import (
 
 // profiles which when called will configure micro to run in that environment
 var profiles = map[string]*Profile{
-	"client":     Client,
-	"service":    Service,
-	"server":     Server,
-	"test":       Test,
-	"local":      Local,
-	"staging":    Staging,
-	"kubernetes": Kubernetes,
+	// built in profiles
+	"client":  Client,
+	"service": Service,
+	"server":  Server,
+	"test":    Test,
+	"local":   Local,
+	"staging": Staging,
 }
 
 // Profile configures an environment
