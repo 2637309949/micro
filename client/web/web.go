@@ -4,8 +4,6 @@ package web
 import (
 	"context"
 	"embed"
-	"encoding/json"
-	"fmt"
 	"html/template"
 	"io/fs"
 	"log"
@@ -13,20 +11,13 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/2637309949/micro/v3/client/web/html"
 	"github.com/2637309949/micro/v3/cmd"
-	"github.com/2637309949/micro/v3/service/auth"
-	"github.com/2637309949/micro/v3/service/logger"
-	"github.com/2637309949/micro/v3/service/registry"
-	cx "github.com/2637309949/micro/v3/util/ctx"
-	"github.com/fatih/camelcase"
 	"github.com/gorilla/mux"
-	"github.com/serenize/snaker"
 	"github.com/urfave/cli/v2"
 )
 
@@ -50,21 +41,9 @@ var (
 
 type srv struct {
 	*mux.Router
-	// registry we use
-	registry registry.Registry
-}
-
-type reg struct {
-	registry.Registry
-
-	sync.RWMutex
-	lastPull time.Time
-	services []*registry.Service
 }
 
 type session struct {
-	// account related to the session
-	Account *auth.Account
 	// token used for the session
 	Token string
 }
@@ -112,18 +91,10 @@ func (s *srv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 		// no session, go get the account
 		if !ok {
-			// can't inspect the token
-			acc, err := auth.Inspect(token)
-			if err != nil {
-				http.Error(w, "Unauthorized", 401)
-				return
-			}
-
 			// save the session
 			mtx.Lock()
 			sess = &session{
-				Account: acc,
-				Token:   token,
+				Token: token,
 			}
 			sessions[token] = sess
 			mtx.Unlock()
@@ -147,58 +118,6 @@ func (s *srv) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	s.Router.ServeHTTP(w, r)
 }
 
-func split(v string) string {
-	parts := camelcase.Split(strings.Replace(v, ".", "", 1))
-	return strings.Join(parts, " ")
-}
-
-func last(v string) string {
-	parts := strings.Split(v, ".")
-	return split(parts[len(parts)-1])
-}
-
-func format(v *registry.Value) string {
-	if v == nil || len(v.Values) == 0 {
-		return "{}"
-	}
-	var f []string
-	for _, k := range v.Values {
-		f = append(f, formatEndpoint(k, 0))
-	}
-	return fmt.Sprintf("{\n%s}", strings.Join(f, ""))
-}
-
-func formatEndpoint(v *registry.Value, r int) string {
-	// default format is tabbed plus the value plus new line
-	fparts := []string{"", "%s %s", "\n"}
-	for i := 0; i < r+1; i++ {
-		fparts[0] += "\t"
-	}
-	// its just a primitive of sorts so return
-	if len(v.Values) == 0 {
-		return fmt.Sprintf(strings.Join(fparts, ""), snaker.CamelToSnake(v.Name), v.Type)
-	}
-
-	// this thing has more things, it's complex
-	fparts[1] += " {"
-
-	vals := []interface{}{snaker.CamelToSnake(v.Name), v.Type}
-
-	for _, val := range v.Values {
-		fparts = append(fparts, "%s")
-		vals = append(vals, formatEndpoint(val, r+1))
-	}
-
-	// at the end
-	l := len(fparts) - 1
-	for i := 0; i < r+1; i++ {
-		fparts[l] += "\t"
-	}
-	fparts = append(fparts, "}\n")
-
-	return fmt.Sprintf(strings.Join(fparts, ""), vals...)
-}
-
 func faviconHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
@@ -212,273 +131,22 @@ func (s *srv) indexHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "OPTIONS" {
 		return
 	}
-
-	domain := registry.DefaultDomain
-
-	services, err := s.registry.ListServices(registry.ListDomain(domain))
-	if err != nil {
-		logger.Errorf("Error listing services: %v", err)
-	}
-
-	type webService struct {
-		Name string
-		Link string
-		Icon string // TODO: lookup icon
-	}
-
-	var webServices []webService
-	for _, srv := range services {
-		name := srv.Name
-		link := fmt.Sprintf("/%v", name)
-
-		if len(srv.Endpoints) == 0 {
-			continue
-		}
-
-		// in the case of 3 letter things e.g m3o convert to M3O
-		if len(name) <= 3 && strings.ContainsAny(name, "012345789") {
-			name = strings.ToUpper(name)
-		}
-
-		webServices = append(webServices, webService{Name: name, Link: link})
-	}
-
-	sort.Slice(webServices, func(i, j int) bool { return webServices[i].Name < webServices[j].Name })
-
-	type templateData struct {
-		HasWebServices bool
-		WebServices    []webService
-	}
-
-	data := templateData{len(webServices) > 0, webServices}
-	s.render(w, r, html.IndexTemplate, data)
+	s.render(w, r, html.IndexTemplate, struct{}{})
 }
 
 func (s *srv) loginHandler(w http.ResponseWriter, req *http.Request) {
-	if req.Method == "POST" {
-		s.generateTokenHandler(w, req)
-		return
-	}
-
 	s.render(w, req, html.LoginTemplate, struct{}{})
 }
 
 func (s *srv) logoutHandler(w http.ResponseWriter, req *http.Request) {
-	var domain string
-	if arr := strings.Split(req.Host, ":"); len(arr) > 0 {
-		domain = arr[0]
-	}
-
 	http.SetCookie(w, &http.Cookie{
 		Name:    TokenCookieName,
 		Value:   "",
 		Expires: time.Unix(0, 0),
-		Domain:  domain,
-		Secure:  false,
+		Secure:  true,
 	})
 
-	http.Redirect(w, req, "/", http.StatusFound)
-}
-
-func (s *srv) generateTokenHandler(w http.ResponseWriter, req *http.Request) {
-	renderError := func(errMsg string) {
-		t, err := template.New("template").Parse(html.LoginTemplate)
-		if err != nil {
-			http.Error(w, "Error occurred:"+err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		if err := t.ExecuteTemplate(w, "basic", map[string]interface{}{
-			"error": errMsg,
-		}); err != nil {
-			http.Error(w, "Error occurred:"+err.Error(), http.StatusInternalServerError)
-		}
-	}
-
-	user := req.PostFormValue("username")
-	if len(user) == 0 {
-		renderError("Missing Username")
-		return
-	}
-
-	pass := req.PostFormValue("password")
-	if len(pass) == 0 {
-		renderError("Missing Password")
-		return
-	}
-
-	acc, err := auth.Token(
-		auth.WithCredentials(user, pass),
-		auth.WithTokenIssuer(Namespace),
-		auth.WithExpiry(time.Hour*24*7),
-	)
-
-	if err != nil {
-		renderError("Authentication failed: " + err.Error())
-		return
-	}
-
-	var domain string
-	if arr := strings.Split(req.Host, ":"); len(arr) > 0 {
-		domain = arr[0]
-	}
-	http.SetCookie(w, &http.Cookie{
-		Name:    TokenCookieName,
-		Value:   acc.AccessToken,
-		Expires: acc.Expiry,
-		Domain:  domain,
-		Secure:  false,
-	})
-
-	http.Redirect(w, req, "/", http.StatusFound)
-}
-
-func (s *srv) registryHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	svc := vars["name"]
-
-	domain := registry.DefaultDomain
-
-	if len(svc) > 0 {
-		sv, err := s.registry.GetService(svc, registry.GetDomain(domain))
-		if err != nil {
-			http.Error(w, "Error occurred:"+err.Error(), 500)
-			return
-		}
-
-		if len(sv) == 0 {
-			http.Error(w, "Not found", 404)
-			return
-		}
-
-		if r.Header.Get("Content-Type") == "application/json" {
-			b, err := json.Marshal(map[string]interface{}{
-				"services": s,
-			})
-			if err != nil {
-				http.Error(w, "Error occurred:"+err.Error(), 500)
-				return
-			}
-			w.Header().Set("Content-Type", "application/json")
-			w.Write(b)
-			return
-		}
-
-		s.render(w, r, html.ServiceTemplate, sv)
-		return
-	}
-
-	services, err := s.registry.ListServices(registry.ListDomain(domain))
-	if err != nil {
-		logger.Errorf("Error listing services: %v", err)
-	}
-
-	sort.Sort(sortedServices{services})
-
-	if r.Header.Get("Content-Type") == "application/json" {
-		b, err := json.Marshal(map[string]interface{}{
-			"services": services,
-		})
-		if err != nil {
-			http.Error(w, "Error occurred:"+err.Error(), 500)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(b)
-		return
-	}
-
-	s.render(w, r, html.RegistryTemplate, services)
-}
-
-func (s *srv) callHandler(w http.ResponseWriter, r *http.Request) {
-	domain := registry.DefaultDomain
-
-	services, err := s.registry.ListServices(registry.ListDomain(domain))
-	if err != nil {
-		logger.Errorf("Error listing services: %v", err)
-	}
-
-	sort.Sort(sortedServices{services})
-
-	serviceMap := make(map[string][]*registry.Endpoint)
-	for _, service := range services {
-		if len(service.Endpoints) > 0 {
-			serviceMap[service.Name] = service.Endpoints
-			continue
-		}
-		// lookup the endpoints otherwise
-		s, err := s.registry.GetService(service.Name, registry.GetDomain(domain))
-		if err != nil {
-			continue
-		}
-		if len(s) == 0 {
-			continue
-		}
-		serviceMap[service.Name] = s[0].Endpoints
-	}
-
-	if r.Header.Get("Content-Type") == "application/json" {
-		b, err := json.Marshal(map[string]interface{}{
-			"services": services,
-		})
-		if err != nil {
-			http.Error(w, "Error occurred:"+err.Error(), 500)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(b)
-		return
-	}
-
-	s.render(w, r, html.CallTemplate, serviceMap)
-}
-
-func (s *srv) serviceHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	name := vars["service"]
-	if len(name) == 0 {
-		return
-	}
-
-	domain := registry.DefaultDomain
-
-	services, err := s.registry.GetService(name, registry.GetDomain(domain))
-	if err != nil {
-		logger.Errorf("Error getting service %s: %v", name, err)
-	}
-
-	sort.Sort(sortedServices{services})
-
-	serviceMap := make(map[string][]*registry.Endpoint)
-
-	for _, service := range services {
-		for _, endpoint := range service.Endpoints {
-			service := strings.Split(endpoint.Name, ".")[0]
-			if _, ok := serviceMap[service]; !ok {
-				serviceMap[service] = []*registry.Endpoint{}
-			}
-			serviceMap[service] = append(serviceMap[service], endpoint)
-		}
-	}
-
-	if r.Header.Get("Content-Type") == "application/json" {
-		b, err := json.Marshal(map[string]interface{}{
-			"services": services,
-		})
-		if err != nil {
-			http.Error(w, "Error occurred:"+err.Error(), 500)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(b)
-		return
-	}
-
-	s.render(w, r, html.WebTemplate, serviceMap, templateValue{
-		Key:   "Name",
-		Value: name,
-	})
+	http.Redirect(w, req, "/", 302)
 }
 
 type templateValue struct {
@@ -488,10 +156,7 @@ type templateValue struct {
 
 func (s *srv) render(w http.ResponseWriter, r *http.Request, tmpl string, data interface{}, vals ...templateValue) {
 	t, err := template.New("template").Funcs(template.FuncMap{
-		"Split":  split,
-		"Last":   last,
-		"format": format,
-		"Title":  strings.Title,
+		"Title": strings.Title,
 		"First": func(s string) string {
 			if len(s) == 0 {
 				return s
@@ -521,28 +186,18 @@ func (s *srv) render(w http.ResponseWriter, r *http.Request, tmpl string, data i
 
 	filepath.Join(u.Path, r.URL.Path)
 
-	// If the user is logged in, render Account instead of Login
-	loginTitle := "Login"
-	loginLink := LoginURL
-	user := ""
-	token := ""
+	var token string
 
 	sess, ok := r.Context().Value(session{}).(*session)
 	if ok {
 		token = sess.Token
-		user = sess.Account.ID
-		loginTitle = "Logout"
-		loginLink = "/logout"
 	}
 
 	templateData := map[string]interface{}{
-		"ApiURL":     apiURL,
-		"LoginTitle": loginTitle,
-		"LoginURL":   loginLink,
-		"Results":    data,
-		"User":       user,
-		"Token":      token,
-		"Namespace":  Namespace,
+		"ApiURL":    template.URL(apiURL),
+		"Token":     token,
+		"Results":   data,
+		"Namespace": Namespace,
 	}
 
 	// add extra values
@@ -585,17 +240,7 @@ func Run(ctx *cli.Context) error {
 
 	srv := &srv{
 		Router: mux.NewRouter(),
-		registry: &reg{
-			Registry: registry.DefaultRegistry,
-		},
 	}
-	// extrace context from header
-	srv.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r = r.WithContext(cx.FromRequest(r))
-			next.ServeHTTP(w, r)
-		})
-	})
 
 	htmlContent, err := fs.Sub(content, "html")
 	if err != nil {
@@ -607,12 +252,11 @@ func Run(ctx *cli.Context) error {
 	srv.HandleFunc("/404", srv.notFoundHandler)
 	srv.HandleFunc("/login", srv.loginHandler)
 	srv.HandleFunc("/logout", srv.logoutHandler)
-	srv.HandleFunc("/client", srv.callHandler)
-	srv.HandleFunc("/services", srv.registryHandler)
-	srv.HandleFunc("/service/{name}", srv.registryHandler)
 	srv.PathPrefix("/assets/").Handler(http.FileServer(http.FS(htmlContent)))
-	srv.HandleFunc("/{service}", srv.serviceHandler)
 	srv.HandleFunc("/", srv.indexHandler)
+	srv.HandleFunc("/{service}", srv.indexHandler)
+	srv.HandleFunc("/{service}/{endpoint}", srv.indexHandler)
+	srv.HandleFunc("/{service}/{endpoint}/{method}", srv.indexHandler)
 
 	// create new http server
 	server := &http.Server{
@@ -621,7 +265,7 @@ func Run(ctx *cli.Context) error {
 	}
 
 	if err := server.ListenAndServe(); err != nil {
-		logger.Fatal(err)
+		log.Fatal(err)
 	}
 
 	return nil
@@ -651,25 +295,3 @@ var (
 		},
 	}
 )
-
-func reverse(s []string) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
-}
-
-type sortedServices struct {
-	services []*registry.Service
-}
-
-func (s sortedServices) Len() int {
-	return len(s.services)
-}
-
-func (s sortedServices) Less(i, j int) bool {
-	return s.services[i].Name < s.services[j].Name
-}
-
-func (s sortedServices) Swap(i, j int) {
-	s.services[i], s.services[j] = s.services[j], s.services[i]
-}
