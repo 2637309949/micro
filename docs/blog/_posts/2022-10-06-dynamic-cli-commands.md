@@ -73,7 +73,7 @@ One of the lagging features which I'd love to address in future is unix style pi
 into the next. The unix pipe provides composition like no other, hopefuly at some point we'll be able to replicate this 
 as part of the Micro CLI.
 
-Try out [Micro](https://github.com/micro/micro) for yourself!
+Try out [Micro](https://github.com/2637309949/micro) for yourself!
 
 Update: Oh forgot to mention, the command line also generates help output
 

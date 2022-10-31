@@ -11,7 +11,7 @@ import (
     "fmt"
     "os"
 
-    "github.com/2637309949/micro/v3/client/api"
+    "github.com/2637309949/micro/v3/client/sdk/go"
 )
 
 type Request struct {

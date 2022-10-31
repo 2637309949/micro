@@ -67,5 +67,8 @@ require (
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.0
 	gopkg.in/square/go-jose.v2 v2.4.1 // indirect
+	gorm.io/driver/postgres v1.4.5
+	gorm.io/driver/sqlite v1.4.3
+	gorm.io/gorm v1.24.1-0.20221019064659-5dd2bb482755
 	tailscale.com v1.30.1
 )

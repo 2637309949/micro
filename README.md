@@ -288,17 +288,13 @@ import (
 	"time"
 
 	"github.com/2637309949/micro/v3/service"
-	"github.com/2637309949/micro/v3/service/client"
-	proto "github.com/micro/services/helloworld/proto"
+	pb "github.com/micro/services/helloworld/proto"
 )
 
-func callService(c client.Client) {
-	// create the proto client for helloworld
-	hw := proto.NewHelloworldService("helloworld", c)
-
+func callService(hw pb.HelloworldService) {
 	for {
 		// call an endpoint on the service
-		rsp, err := hw.Call(context.Background(), &proto.CallRequest{
+		rsp, err := hw.Call(context.Background(), &pb.CallRequest{
 			Name: "John",
 		})
 		if err != nil {
@@ -319,8 +315,11 @@ func main() {
 		service.Name("caller"),
 	)
 
+	// new helloworld client
+	hw := pb.NewHelloworldService("helloworld", srv.Client())
+	
 	// run the client caller
-	go callService(srv.Client())
+	go callService(hw)
 	
 	// run the service
 	service.Run()
@@ -350,7 +349,7 @@ import (
     "fmt"
     "os"
 
-    "github.com/2637309949/micro/v3/client/api"
+    "github.com/2637309949/micro-go"
 )
 
 type Request struct {
@@ -363,7 +362,7 @@ type Response struct {
 
 func main() {
 	token := os.Getenv("TOKEN")
-	c := api.NewClient(nil)
+	c := micro.NewClient(nil)
 
 	// set your api token
 	c.SetToken(token)

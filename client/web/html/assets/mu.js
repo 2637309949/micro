@@ -10,6 +10,39 @@ Object.defineProperty(String.prototype, 'capitalize', {
     enumerable: false
 });
 
+String.prototype.parseURL = function(embed) {
+    return this.replace(/[A-Za-z]+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&~\?\/.=]+/g, function(url) {
+        if (embed == true) {
+            var match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/);
+            if (match && match[2].length == 11) {
+                return '<div class="iframe">' +
+                    '<iframe src="//www.youtube.com/embed/' + match[2] +
+                    '" frameborder="0" allowfullscreen></iframe>' + '</div>';
+            };
+            if (url.match(/^.*giphy.com\/media\/[a-zA-Z0-9]+\/[a-zA-Z0-9]+.gif$/)) {
+                return '<div class="animation"><img src="' + url + '"></div>';
+            }
+        };
+        // var pretty = url.replace(/^http(s)?:\/\/(www\.)?/, '');
+        return url.link(url);
+    });
+};
+
+function generateURL(service = '', endpoint = '', query = []) {
+    var u = `/${service}/${endpoint}`;
+    var q = "";
+
+    query.forEach(function(val) {
+        if (q.length == 0) {
+            q = "?" + val;
+            return
+        }
+        q += "&" + val;
+    })
+
+    return u + q;
+}
+
 function getCookie(name) {
     const value = `; ${document.cookie}`;
     const parts = value.split(`; ${name}=`);
@@ -45,6 +78,11 @@ async function login(username, password) {
         "secret": password,
         "token_expiry": 30 * 86400,
     }).then(function(rsp) {
+        if (rsp.token == undefined) {
+            var error = document.getElementById("error");
+            error.innerText = rsp.detail;
+        }
+
         setCookie(cookie, rsp.token.access_token, rsp.token.expiry);
         window.location.href = "/";
     });
@@ -113,7 +151,7 @@ function renderServices(fn) {
     var search = function() {
         var refs = $('a[data-filter]');
         $('.search').on('keyup', function() {
-            var val = $.trim(this.value);
+            var val = $.trim(this.value.toLowerCase());
             refs.hide();
             refs.filter(function() {
                 return $(this).data('filter').search(val) >= 0
@@ -123,7 +161,27 @@ function renderServices(fn) {
         $('.search').on('keypress', function(e) {
             if (e.which != 13) {
                 return;
+            };
+            var val = $.trim(this.value);
+            var parts = val.split(" ");
+
+            // assuming it's some full query
+            if (parts.length > 1) {
+                service = parts[0];
+                endpoint = parts[1];
+                request = [];
+
+                // assemble a request
+                parts.slice(2).forEach(function(val) {
+                    if (val.split("=").length == 2) {
+                        request.push(val);
+                    }
+                });
+
+                window.location.href = generateURL(service, endpoint, request);
             }
+
+            // partial string
             $('.service').each(function() {
                 if ($(this).css('display') == "none") {
                     return;
@@ -249,14 +307,17 @@ function renderEndpoint(service, endpoint, method) {
             content.appendChild(response);
 
             // construct the endpoint
-            var name = service.capitalize() + "." + endpoint;
+            var name = service.capitalize() + "." + endpoint.capitalize();
             if (method != undefined) {
-                name = endpoint + "." + method;
-                heading.innerText += " " + method;
+                name = endpoint.capitalize() + "." + method.capitalize();
+                heading.innerText += " " + method.capitalize();
             } else {
-                method = endpoint;
+                method = endpoint.capitalize();
                 endpoint = service.capitalize();
             }
+
+            const urlSearchParams = new URLSearchParams(window.location.search);
+            const params = Object.fromEntries(urlSearchParams.entries());
 
             rsp.services[0].endpoints.forEach(function(ep) {
                 // render the form
@@ -266,6 +327,7 @@ function renderEndpoint(service, endpoint, method) {
                     // render a form
                     // render output
                     var form = document.createElement("form");
+                    form.id = name;
 
                     form.onsubmit = function(ev) {
                         ev.preventDefault();
@@ -284,67 +346,31 @@ function renderEndpoint(service, endpoint, method) {
                             request[entry.name] = entry.value;
                         }
 
-                        // renders the output recursively
-                        var render = function(key, val, depth) {
-                            // print the value if it's not an object
-                            var print = function(key, val) {
-                                var value = document.createElement("div");
-                                value.setAttribute("class", "field");
-                                key = key.capitalize();
-                                value.innerText = `${key}: ${val}`
-                                return value;
-                            }
-                            // not an object, just print it
-                            if (typeof val != "object") {
-                                return print(key, val)
-                            }
-                            // if it's an array then check types and print
-                            if (val.constructor == Array) {
-                                if (typeof val[0] != "object") {
-                                    return print(key, val);
-                                }
-                            }
-
-                            // is actually a number
-                            if (val.constructor == Number) {
-                                return print(key, val);
-                            }
-
-                            var output = document.createElement("div");
-                            output.setAttribute("class", "response");
-
-                            // iterate the objects as needed
-                            for (const [key, value] of Object.entries(val)) {
-                                // append the next output value
-                                depth++
-                                output.appendChild(render(key, value, depth));
-                            }
-
-                            // return the entire rendered value
-                            return output;
-                        }
-
                         call(service, endpoint, method, request)
                             .then(function(rsp) {
-                                // prepend to response
-                                response.innerText = '';
-                                // set a title
-                                var h4 = document.createElement("h4");
-                                h4.setAttribute("class", "title");
-                                h4.innerText = "Response";
-                                response.appendChild(h4);
-                                // render values
-                                response.appendChild(render("response", rsp, 0));
+                                renderResponse(response, rsp);
                             });
                     };
 
-                    ep.request.values.forEach(function(value) {
+                    var submitForm = false;
+
+                    ep.request.values.forEach(function(value, idx) {
                         var input = document.createElement("input");
                         input.id = value.name
                         input.type = "text";
                         input.name = value.name;
                         input.placeholder = value.name;
                         input.autocomplete = "off";
+
+                        if (idx == 0) {
+                            input.autofocus = true;
+                        }
+
+                        if (params[value.name] != undefined) {
+                            input.value = params[value.name];
+                            submitForm = true;
+                        }
+
                         form.appendChild(input);
                     });
 
@@ -353,11 +379,130 @@ function renderEndpoint(service, endpoint, method) {
                     submit.innerText = "Submit";
                     form.appendChild(submit);
                     request.appendChild(form);
+
+                    // auto-submit when we have form values
+                    if (submitForm) {
+                        $(form).submit();
+                    }
                 }
                 // end forEach
             })
             // end Promise
         });
+}
+
+// renders the output recursively as a set of divs
+function renderOutput(key, val, depth) {
+    // print the value if it's not an object
+    var print = function(key, val) {
+        var value = document.createElement("div");
+        value.setAttribute("class", "field");
+        key = key.replace("_", " ", -1).capitalize();
+
+        // parse a URL if its a string
+        if (val.parseURL != undefined) {
+            val = val.parseURL();
+        }
+
+        value.innerHTML = `<span class="key">${key}</span>&nbsp;<span class="value">${val}</span>`
+        return value;
+    }
+    // not an object, just print it
+    if (typeof val != "object") {
+        return print(key, val)
+    }
+    // if it's an array then check types and print
+    if (val.constructor == Array) {
+        if (typeof val[0] != "object") {
+            return print(key, val);
+        }
+    }
+
+    // is actually a number
+    if (val.constructor == Number) {
+        return print(key, val);
+    }
+
+    var output = document.createElement("div");
+    output.setAttribute("class", "response");
+
+    // iterate the objects as needed
+    for (const [key, value] of Object.entries(val)) {
+        // append the next output value
+        depth++
+        output.appendChild(renderOutput(key, value, depth));
+    }
+
+    // return the entire rendered value
+    return output;
+}
+
+// returns JSON formatted in a pre object
+function renderJSON(val) {
+    var json = document.createElement("pre");
+    json.innerText = JSON.stringify(val, null, "\t");
+    return json;
+}
+
+// render the response output
+function renderResponse(response, rsp) {
+    response.innerText = '';
+
+    // set a title
+    var h4 = document.createElement("h4");
+    h4.setAttribute("class", "title");
+    h4.innerText = "Response";
+
+    // text based output
+    var textOutput = renderOutput("response", rsp, 0);
+    // json based output
+    var jsonOutput = renderJSON(rsp);
+
+    var output = document.createElement("div");
+    output.id = "output";
+
+    var links = document.createElement("span");
+    links.id = "links";
+
+    // create the output links
+    var textBtn = document.createElement("a");
+    var divider = document.createElement("span");
+    var jsonBtn = document.createElement("a");
+    divider.innerText = ' | ';
+    textBtn.innerText = "Text";
+    jsonBtn.innerText = "JSON";
+
+    // execute on text
+    textBtn.onclick = function(ev) {
+        ev.preventDefault();
+        output.innerText = '';
+        output.appendChild(textOutput);
+    };
+
+    // execute on json
+    jsonBtn.onclick = function(ev) {
+        ev.preventDefault();
+        output.innerText = '';
+        output.appendChild(jsonOutput);
+    };
+
+    textBtn.href = '#text';
+    jsonBtn.href = '#json';
+    // create the links
+    links.appendChild(textBtn);
+    links.appendChild(divider);
+    links.appendChild(jsonBtn);
+    // add links to header
+    h4.appendChild(links);
+
+    if (window.location.hash == "#json") {
+        output.appendChild(jsonOutput);
+    } else {
+        output.appendChild(textOutput);
+    }
+    // set the response output;
+    response.appendChild(h4);
+    response.appendChild(output);
 }
 
 function submitLogin(form) {

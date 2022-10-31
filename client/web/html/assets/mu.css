@@ -11,9 +11,23 @@ html, body {
   max-width: 1024px;
 }
 a { color: #333333; text-decoration: none; }
+a:hover { text-decoration: underline; }
+#error {
+  color: red;
+}
+#login, #error {
+  margin: 0 auto;
+  max-width: 400px;
+}
 #logo {
   font-size: 2em;
+  font-weight: 600;
   text-decoration: none;
+}
+#links {
+  float: right;
+  font-size: 0.8em;
+  font-weight: normal;
 }
 #menu {
   float: right;
@@ -50,8 +64,14 @@ button:hover {
   height: calc(100vh - 250px);
   overflow: auto;
 }
+.field {
+  margin-bottom: 3px;
+}
 .key, .title {
   text-transform: capitalize;
+}
+.key {
+  color: grey;
 }
 .table>tbody>tr>th, .table>tbody>tr>td {
   border-top: none;
@@ -66,10 +86,6 @@ button:hover {
 }
 .user {
     padding: 15px;
-}
-.inner {
-  margin: 0 auto;
-  max-width: 400px;
 }
 form  {
   display: flex;
@@ -88,8 +104,8 @@ input {
 }
 pre {
   padding: 20px;
-  background-color: #EEF0F3;
   border: 1px solid #ccc;
+  overflow: auto;
   word-wrap: break-word;
 }
 textarea#request {
