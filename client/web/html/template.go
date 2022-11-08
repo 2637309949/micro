@@ -26,12 +26,13 @@ var (
 	</head>
 	<body>
 	  <div id="header">
-            <a id="logo" href="/">Micro</a>
+            <a id="logo" href="/"><img src="/assets/mu.png" width=45px height=auto /></a>
+            {{if .Token}}
 	    <ul id="menu">
-                {{if .Token}}
+	        <li><a href="/services">Services</a></li>
 	        <li><a href="/logout">Logout</a></li>
-		{{end}}
 	    </ul>
+	   {{end}}
           </div>
           <div id="container">
               <div id="heading">{{ template "heading" . }}</div>
