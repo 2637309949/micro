@@ -184,7 +184,7 @@ func TestRequestPayloadFromRequest(t *testing.T) {
 		t.Fatal("Failed to marshal proto", err)
 	}
 
-	jsonBytes, err := json.Marshal(protoEvent)
+	jsonBytes, err := json.Marshal(&protoEvent)
 	if err != nil {
 		t.Fatal("Failed to marshal proto to JSON ", err)
 	}
